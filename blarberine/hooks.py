@@ -1,8 +1,8 @@
 app_name = "blarberine"
 app_title = "Blarberine"
-app_publisher = "Roshini"
+app_publisher = "Yogaselvan S"
 app_description = "Blarberine custom Frappe app"
-app_email = "roshinigdas126@gmail.com"
+app_email = "yogaselvansaravanan557@gmail.com"
 app_license = "mit"
 
 # Apps

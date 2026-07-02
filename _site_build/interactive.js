@@ -1,0 +1,230 @@
+/* Blarberine interactive widgets — services category-filter + basket, and the
+   team (barber -> their services) widget. Renders into #services-app / #team-app.
+   Shares a basket in localStorage that Phase 3 booking will consume. */
+(function () {
+  "use strict";
+  var CORAL="#d4af37", NAVY="#050505", INK="#f2ede4", MUTED="#948c7a",
+      BORDER="#2b2820", ALT="#141414", GREEN="#3fbf7a", CARD="#1a1a1a", DARK="#0d0d0d";
+  var API="/api/method/blarberine.blarberine.api.";
+  var FONT="'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+  var LANG=/^\/en(\/|$)/.test(location.pathname)?"en":"lt";
+  var BOOK=(LANG==="en"?"/en/blarberine":"/blarberine")+"?choose=1#booking";
+  var I18N={
+    en:{select:"Select",selected:"✓ Selected",add:"+ Add",added:"✓ Added",show:"Show details",all:"All",
+        pay:"Pay at venue",edit:"▸ Edit",hide:"▾ Hide",remove:"× Remove",choose:"Choose time",
+        service:"service",services:"services",svcOf:"'s services",askStore:"Ask in-store for this barber's full menu.",
+        noBarbers:"No barbers yet.",errSvc:"Could not load services.",errTeam:"Could not load team."},
+    lt:{select:"Pasirinkti",selected:"✓ Pasirinkta",add:"+ Pridėti",added:"✓ Pridėta",show:"Plačiau",all:"Visos",
+        pay:"Atsiskaitymas vietoje",edit:"▸ Redaguoti",hide:"▾ Slėpti",remove:"× Pašalinti",choose:"Pasirinkti laiką",
+        service:"paslauga",services:"paslaugos",svcOf:" paslaugos",askStore:"Pilno meniu teiraukitės vietoje.",
+        noBarbers:"Kirpėjų nėra.",errSvc:"Nepavyko įkelti paslaugų.",errTeam:"Nepavyko įkelti komandos."}
+  };
+  var L=I18N[LANG]||I18N.lt;
+
+  function ready(fn){ if(document.readyState!=="loading") fn(); else document.addEventListener("DOMContentLoaded",fn); }
+  function csrf(){ return (window.frappe&&window.frappe.csrf_token)||""; }
+  function el(tag,style,props){
+    var n=document.createElement(tag); if(style) n.style.cssText=style;
+    if(props) for(var k in props){ if(k==="text")n.textContent=props[k]; else if(k==="html")n.innerHTML=props[k];
+      else if(k==="on")for(var ev in props.on)n.addEventListener(ev,props.on[ev]); else n.setAttribute(k,props[k]); }
+    return n;
+  }
+  function clear(n){ while(n.firstChild) n.removeChild(n.firstChild); }
+  function getData(){
+    return fetch(API+"get_booking_data?lang="+LANG,{headers:{"X-Frappe-CSRF-Token":csrf()}})
+      .then(function(r){return r.json();}).then(function(j){return j.message||{};});
+  }
+
+  // ---- basket (shared, persisted) ----
+  function loadBasket(){ try{ return JSON.parse(localStorage.getItem("bl_basket"))||[]; }catch(e){ return []; } }
+  function saveBasket(b){ try{ localStorage.setItem("bl_basket",JSON.stringify(b)); }catch(e){} }
+  function inBasket(name){ return loadBasket().some(function(x){return x.name===name;}); }
+  function toggleBasket(svc){
+    var b=loadBasket(), i=-1;
+    b.forEach(function(x,idx){ if(x.name===svc.name) i=idx; });
+    if(i>=0) b.splice(i,1);
+    else b.push({name:svc.name, service_name:svc.service_name, price:svc.price, price_display:svc.price_display});
+    saveBasket(b); renderBar(); return inBasket(svc.name);
+  }
+  function eur(v){ v=v||0; return (v===Math.round(v))?("€"+Math.round(v)):("€"+v.toFixed(2)); }
+
+  var CURRENT_REFRESH=null;  // re-renders the visible widget's list so Select states stay in sync
+  function removeFromBasket(name){
+    saveBasket(loadBasket().filter(function(x){return x.name!==name;}));
+    renderBar(); if(CURRENT_REFRESH) CURRENT_REFRESH();
+  }
+
+  var bar=null, barOpen=false;
+  function renderBar(){
+    var b=loadBasket();
+    if(!b.length){ barOpen=false; if(bar){ bar.remove(); bar=null; } return; }
+    var total=b.reduce(function(s,x){return s+(x.price||0);},0);
+    if(!bar){
+      bar=el("div","position:fixed;left:0;right:0;bottom:0;z-index:900;background:"+CARD+";border-top:1px solid "+BORDER+
+        ";box-shadow:0 -6px 24px rgba(0,0,0,.5);font-family:"+FONT+";");
+      document.body.appendChild(bar);
+    }
+    clear(bar);
+    if(barOpen){
+      var panel=el("div","max-width:1080px;margin:0 auto;padding:12px 24px 0;");
+      b.forEach(function(x){
+        var r=el("div","display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid "+BORDER+";");
+        var l=el("div","display:flex;flex-direction:column;min-width:0;");
+        l.appendChild(el("div","font-family:"+FONT+";font-size:15px;color:"+INK+";font-weight:600;",{text:x.service_name}));
+        l.appendChild(el("div","font-family:"+FONT+";font-size:13px;color:"+MUTED+";",{text:x.price_display}));
+        var rm=el("button","font-family:"+FONT+";background:none;border:none;color:"+MUTED+";font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;",
+          {html:"&times; "+L.remove.replace("× ",""),on:{click:function(){ removeFromBasket(x.name); },
+            mouseover:function(e){e.target.style.color=CORAL;}, mouseout:function(e){e.target.style.color=MUTED;}}});
+        r.appendChild(l); r.appendChild(rm); panel.appendChild(r);
+      });
+      bar.appendChild(panel);
+    }
+    var rowWrap=el("div","max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 24px;");
+    var info=el("div","display:flex;flex-direction:column;cursor:pointer;",{on:{click:function(){ barOpen=!barOpen; renderBar(); }}});
+    var line1=el("div","display:flex;align-items:center;gap:10px;");
+    line1.appendChild(el("span","font-family:"+FONT+";font-size:16px;font-weight:700;color:"+INK+";",
+      {text:b.length+" "+(b.length===1?L.service:L.services)+"  ·  "+eur(total)}));
+    line1.appendChild(el("span","font-family:"+FONT+";font-size:12px;color:"+CORAL+";font-weight:600;",{text:barOpen?L.hide:L.edit}));
+    info.appendChild(line1);
+    info.appendChild(el("div","font-family:"+FONT+";font-size:12px;color:"+MUTED+";",{text:L.pay}));
+    var go=el("a","font-family:"+FONT+";background:"+CORAL+";color:#0d0d0d;font-weight:700;font-size:15px;"+
+      "padding:12px 28px;border-radius:8px;text-decoration:none;cursor:pointer;flex-shrink:0;",{text:L.choose,href:BOOK});
+    rowWrap.appendChild(info); rowWrap.appendChild(go);
+    bar.appendChild(rowWrap);
+  }
+
+  function selectBtn(svc){
+    function paint(btn){
+      var on=inBasket(svc.name);
+      btn.textContent=on?L.selected:L.select;
+      btn.style.cssText="font-family:"+FONT+";font-size:14px;font-weight:600;padding:7px 18px;border-radius:8px;"+
+        "cursor:pointer;flex-shrink:0;transition:all .12s ease;"+
+        (on?("background:#13291c;color:"+GREEN+";border:1px solid "+GREEN+";")
+           :("background:"+CARD+";color:"+CORAL+";border:1px solid "+CORAL+";"));
+    }
+    var btn=el("button"); paint(btn);
+    btn.addEventListener("click",function(){ toggleBasket(svc); paint(btn); });
+    return btn;
+  }
+
+  function serviceRow(svc){
+    var left=el("div","display:flex;flex-direction:column;flex-shrink:1;min-width:0;");
+    left.appendChild(el("div","font-family:"+FONT+";font-size:16px;color:"+INK+";font-weight:600;",{text:svc.service_name}));
+    var meta=el("div","display:flex;gap:8px;align-items:center;margin-top:4px;");
+    meta.appendChild(el("span","font-family:"+FONT+";font-size:13px;color:"+MUTED+";",{text:svc.duration_display}));
+    meta.appendChild(el("span","font-family:"+FONT+";font-size:13px;color:"+MUTED+";",{text:"·"}));
+    meta.appendChild(el("span","font-family:"+FONT+";font-size:13px;color:"+CORAL+";font-weight:500;",{text:L.show}));
+    left.appendChild(meta);
+    var right=el("div","display:flex;align-items:center;gap:16px;flex-shrink:0;");
+    right.appendChild(el("div","font-family:"+FONT+";font-size:16px;color:"+INK+";font-weight:700;",{text:svc.price_display}));
+    right.appendChild(selectBtn(svc));
+    var row=el("div","display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;"+
+      "padding:16px 0;border-bottom:1px solid "+BORDER+";");
+    row.appendChild(left); row.appendChild(right);
+    return row;
+  }
+
+  // ---- Services page ----
+  function renderServices(app, cats){
+    clear(app);
+    var active=L.all;
+    var chipRow=el("div","display:flex;flex-wrap:wrap;gap:10px;margin-bottom:26px;");
+    var list=el("div","display:flex;flex-direction:column;");
+    function drawChips(){
+      clear(chipRow);
+      [L.all].concat(cats.map(function(c){return c.category_name;})).forEach(function(label){
+        var on=(label===active);
+        var chip=el("button","font-family:"+FONT+";font-size:14px;font-weight:600;padding:9px 18px;border-radius:999px;"+
+          "cursor:pointer;transition:all .12s ease;"+
+          (on?("background:"+CORAL+";color:#0d0d0d;border:1px solid "+CORAL+";")
+             :("background:"+CARD+";color:"+INK+";border:1px solid "+BORDER+";")),
+          {text:label,on:{click:function(){ active=label; drawChips(); drawList(); }}});
+        chipRow.appendChild(chip);
+      });
+    }
+    function drawList(){
+      clear(list);
+      cats.forEach(function(c){
+        if(active!==L.all && c.category_name!==active) return;
+        list.appendChild(el("div","font-family:"+FONT+";font-size:19px;color:"+INK+";font-weight:700;margin:18px 0 2px;",{text:c.category_name}));
+        (c.services||[]).forEach(function(s){ list.appendChild(serviceRow(s)); });
+      });
+    }
+    drawChips(); drawList();
+    CURRENT_REFRESH=drawList;
+    app.appendChild(chipRow); app.appendChild(list);
+  }
+
+  // ---- Team page ----
+  function renderTeam(app, barbers, cats){
+    clear(app);
+    var svcMap={}, catOf={};
+    cats.forEach(function(c){ (c.services||[]).forEach(function(s){ svcMap[s.name]=s; catOf[s.name]=c.category_name; }); });
+    if(!barbers.length){ app.appendChild(el("p","font-family:"+FONT+";color:"+MUTED,{text:L.noBarbers})); return; }
+    var active=barbers[0];
+    var wrap=el("div","display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;");
+    var listCol=el("div","display:flex;flex-direction:column;width:280px;flex-shrink:0;min-width:240px;");
+    var panel=el("div","display:flex;flex-direction:column;flex:1;min-width:260px;");
+    function drawList(){
+      clear(listCol);
+      barbers.forEach(function(b){
+        var on=(b.name===active.name);
+        var item=el("div","display:flex;align-items:center;gap:14px;padding:12px 10px;border-radius:12px;cursor:pointer;"+
+          "transition:background .12s ease;border-left:3px solid "+(on?NAVY:"transparent")+";"+(on?"background:"+ALT+";":""),
+          {on:{click:function(){ active=b; drawList(); drawPanel(); }}});
+        if(b.photo) item.appendChild(el("img","width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;",{src:b.photo}));
+        item.appendChild(el("div","font-family:"+FONT+";font-size:16px;color:"+INK+";font-weight:600;",{text:b.barber_name}));
+        listCol.appendChild(item);
+      });
+    }
+    function drawPanel(){
+      clear(panel);
+      panel.appendChild(el("h3","font-family:"+FONT+";font-size:22px;color:"+INK+";font-weight:700;margin:0 0 4px;",{text:active.barber_name}));
+      if(active.bio) panel.appendChild(el("p","font-family:"+FONT+";font-size:14px;color:"+MUTED+";line-height:1.55;margin:0 0 16px;max-width:520px;",{text:active.bio}));
+      var names=active.service_names||[];
+      var doneCats={}, chips=el("div","display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;");
+      names.forEach(function(nm){ var c=catOf[nm]; if(c&&!doneCats[c]){ doneCats[c]=1;
+        chips.appendChild(el("span","font-family:"+FONT+";font-size:13px;font-weight:600;color:"+NAVY+";background:"+ALT+";"+
+          "padding:6px 14px;border-radius:999px;border:1px solid "+BORDER+";",{text:c})); } });
+      if(chips.children.length) panel.appendChild(chips);
+      panel.appendChild(el("div","font-family:"+FONT+";font-size:13px;color:"+MUTED+";font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;",{text:active.barber_name.split(" ")[0]+L.svcOf}));
+      var svcWrap=el("div","display:flex;flex-direction:column;");
+      var shown=0;
+      names.forEach(function(nm){ var s=svcMap[nm]; if(s){ shown++; svcWrap.appendChild(serviceRow(s)); } });
+      if(!shown) svcWrap.appendChild(el("p","font-family:"+FONT+";color:"+MUTED+";font-size:14px;",{text:L.askStore}));
+      panel.appendChild(svcWrap);
+    }
+    drawList(); drawPanel();
+    CURRENT_REFRESH=drawPanel;
+    wrap.appendChild(listCol); wrap.appendChild(panel);
+    app.appendChild(wrap);
+  }
+
+  function wireMobileMenu(){
+    var burger=document.querySelector(".bl-burger");
+    var menu=document.querySelector(".bl-mobile-menu");
+    if(!burger || !menu) return;
+    burger.addEventListener("click",function(e){
+      e.preventDefault();
+      var open=(menu.style.display==="flex");
+      menu.style.display=open?"none":"flex";
+      burger.innerHTML=open?"☰":"✕";
+    });
+  }
+
+  ready(function(){
+    wireMobileMenu();
+    var sApp=document.getElementById("services-app");
+    var tApp=document.getElementById("team-app");
+    if(!sApp && !tApp){ renderBar(); return; }
+    getData().then(function(d){
+      var cats=d.service_categories||[], barbers=d.barbers||[];
+      if(sApp) renderServices(sApp, cats);
+      if(tApp) renderTeam(tApp, barbers, cats);
+      renderBar();
+    }).catch(function(){
+      if(sApp) sApp.innerHTML='<p style="font-family:'+FONT+';color:'+CORAL+';text-align:center">'+L.errSvc+'</p>';
+      if(tApp) tApp.innerHTML='<p style="font-family:'+FONT+';color:'+CORAL+';text-align:center">'+L.errTeam+'</p>';
+    });
+  });
+})();
