@@ -429,6 +429,12 @@ def run_all(email="yogaselvansaravanan557@gmail.com"):
         doc.page_data_script = data_script(e["data_script"])
         doc.published = 1
         doc.route = e["route"]
+        if e.get("seo_title"):
+            doc.page_title = e["seo_title"]
+        if e.get("seo_desc"):
+            doc.meta_description = e["seo_desc"]
+        if e.get("seo_image"):
+            doc.meta_image = e["seo_image"]
         have = [r.builder_script for r in (doc.get("client_scripts") or [])]
         for sname in script_names:
             if sname not in have:
@@ -437,3 +443,177 @@ def run_all(email="yogaselvansaravanan557@gmail.com"):
         frappe.db.set_value("Builder Page", name, "owner", email, update_modified=False)
         frappe.db.commit()
         print("PUBLISHED %-2s %-8s -> /%s" % (e["lang"], e["key"], e["route"]))
+
+
+def rerender_blog():
+    """Re-render every Blog Post's Builder Page (refresh nav/footer/meta) — no DeepL calls."""
+    from blarberine.blarberine.blog_render import render_post
+    n = 0
+    for r in frappe.get_all("Blog Post", fields=["name"]):
+        render_post(frappe.get_doc("Blog Post", r.name))
+        n += 1
+    frappe.db.commit()
+    print("re-rendered %d blog pages" % n)
+
+
+def translate_existing():
+    """Translate every source Blog Post (translate_automatically on) via the real DeepL key."""
+    import traceback
+    from blarberine.blarberine.blog_translate import sync_translation, is_configured
+    try:
+        print("DeepL configured:", is_configured())
+        for r in frappe.get_all("Blog Post",
+                                filters={"source_post": ["is", "not set"], "translate_automatically": 1},
+                                fields=["name", "title", "language"]):
+            doc = frappe.get_doc("Blog Post", r.name)
+            child_name = sync_translation(doc)
+            child = frappe.get_doc("Blog Post", child_name)
+            print("SRC [%s]: %s" % (doc.language, doc.title))
+            print("  -> [%s]: %s | %s | published=%s" % (child.language, child.title, child.route, child.published))
+        frappe.db.commit()
+        print("done")
+    except Exception:
+        traceback.print_exc()
+
+
+def cleanup_mock_translation():
+    """Remove any auto-generated (translated) child posts + their pages (mock cleanup)."""
+    import traceback
+    try:
+        for c in frappe.get_all("Blog Post", filters={"source_post": ["is", "set"]}, fields=["name", "title"]):
+            frappe.delete_doc("Blog Post", c.name, ignore_permissions=True, force=True)
+            print("deleted child:", c.title)
+        frappe.db.commit()
+        print("done")
+    except Exception:
+        traceback.print_exc()
+
+
+def test_autotranslate():
+    """Flip translate_automatically on the LT 'barzda' post and verify the paired EN post
+    + its Builder Page get created (uses mock DeepL key -> offline)."""
+    import traceback
+    try:
+        rows = frappe.get_all("Blog Post", filters={"title": "Kaip pasirūpinti barzda: 5 patarimai"}, fields=["name"])
+        if not rows:
+            print("source post not found"); return
+        doc = frappe.get_doc("Blog Post", rows[0].name)
+        doc.translate_automatically = 1
+        doc.save(ignore_permissions=True)
+        frappe.db.commit()
+        print("SOURCE:", doc.language, doc.route, "|", doc.title)
+        child = frappe.db.get_value("Blog Post", {"source_post": doc.name},
+                                    ["name", "language", "route", "title", "published"], as_dict=True)
+        print("CHILD :", child)
+        if child:
+            pg = frappe.db.get_value("Builder Page", {"route": child["route"]}, ["name", "published"], as_dict=True)
+            print("CHILD PAGE:", pg)
+    except Exception:
+        traceback.print_exc()
+
+
+def seed_blog():
+    """Create a couple of sample published Blog Posts (LT). Saving each fires
+    on_update -> render_post -> a themed Builder Page at its route. Idempotent by title."""
+    import traceback
+    posts = [
+        {"title": "Kaip pasirūpinti barzda: 5 patarimai",
+         "excerpt": "Paprasti žingsniai, kad barzda atrodytų tvarkinga ir sveika kiekvieną dieną.",
+         "cover_image": "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=1000&q=80",
+         "content": (
+            "<p>Tvarkinga barzda – tai ne tik geras kirpimas, bet ir kasdienė priežiūra. "
+            "Štai penki paprasti patarimai, kurie padės jūsų barzdai atrodyti puikiai.</p>"
+            "<h2>1. Plaukite reguliariai</h2><p>Naudokite švelnų barzdos šampūną 2–3 kartus per "
+            "savaitę, kad oda po barzda liktų švari ir sveika.</p>"
+            "<h2>2. Naudokite aliejų</h2><p>Barzdos aliejus minkština plaukelius ir maitina odą – "
+            "ypač svarbu šaltuoju metų laiku.</p>"
+            "<h2>3. Šukuokite kasdien</h2><p>Reguliarus šukavimas nukreipia plaukelius tinkama "
+            "kryptimi ir padeda išvengti susivėlimo.</p>"
+            "<h2>4. Formuokite reguliariai</h2><p>Užsukite pas meistrą kas 3–4 savaites, kad "
+            "kontūrai išliktų aiškūs.</p>"
+            "<h2>5. Nepamirškite kaklo linijos</h2><p>Tvarkinga kaklo linija – smulkmena, kuri iš "
+            "karto pakelia bendrą įvaizdį.</p>")},
+        {"title": "Kaip išsirinkti kirpimą pagal veido formą",
+         "excerpt": "Trumpas gidas, padėsiantis pasirinkti kirpimą, kuris pabrėžia jūsų bruožus.",
+         "cover_image": "https://images.unsplash.com/photo-1503443207922-dff7d543fd0e?auto=format&fit=crop&w=1000&q=80",
+         "content": (
+            "<p>Tinkamas kirpimas pabrėžia veido bruožus ir suteikia pasitikėjimo. "
+            "Štai kaip pasirinkti kirpimą pagal veido formą.</p>"
+            "<h2>Apvalus veidas</h2><p>Rinkitės kirpimą su daugiau apimties viršuje ir trumpesniais "
+            "šonais – tai vizualiai pailgina veidą.</p>"
+            "<h2>Kvadratinis veidas</h2><p>Tinka beveik viskas, tačiau klasikiniai kirpimai puikiai "
+            "pabrėžia stiprų žandikaulį.</p>"
+            "<h2>Pailgas veidas</h2><p>Venkite per daug apimties viršuje – rinkitės vidutinio ilgio "
+            "šonus, kad proporcijos išliktų darnios.</p>"
+            "<p>Nežinote, kas tiktų jums? <strong>Užsukite</strong> – padėsime išsirinkti.</p>")},
+    ]
+    try:
+        for i, p in enumerate(posts):
+            # delete any prior version (also removes its Builder Page via on_trash) then recreate clean
+            for e in frappe.get_all("Blog Post", filters={"title": p["title"]}, fields=["name"]):
+                frappe.delete_doc("Blog Post", e.name, ignore_permissions=True, force=True)
+            doc = frappe.new_doc("Blog Post")
+            doc.title = p["title"]
+            doc.excerpt = p["excerpt"]
+            doc.cover_image = p["cover_image"]
+            doc.content = p["content"]
+            doc.author = "Blarberinė"
+            doc.language = "lt"
+            doc.published = 1
+            doc.published_on = frappe.utils.add_days(frappe.utils.today(), -i)
+            doc.save(ignore_permissions=True)
+            print("seeded post:", doc.title, "-> route", doc.route)
+        frappe.db.commit()
+        print("done")
+    except Exception:
+        traceback.print_exc()
+
+
+def inspect_barbers():
+    import traceback
+    try:
+        for b in frappe.get_all("Barber", fields=["name", "barber_name", "is_active", "photo", "bio"],
+                                order_by="barber_name asc"):
+            print("---")
+            print("name      :", b.name)
+            print("barber    :", b.barber_name, "| active:", b.is_active)
+            print("photo     :", repr(b.photo))
+            print("bio       :", repr(b.bio))
+    except Exception:
+        traceback.print_exc()
+
+
+def fix_lukas():
+    """Two real problems: (1) Lukas' photo points at a missing private file -> broken image;
+    (2) the LT page shows 'kazkas' because the Translation record for his (correct) English bio
+    was set to junk. Fix the photo (clear -> stock fallback like the others) and repair the bio
+    translation to proper Lithuanian."""
+    import traceback
+    try:
+        EN_BIO = "Fast, friendly and great with kids. Your go-to for buzz cuts and quick refreshes."
+        LT_BIO = ("Greitas, draugiškas ir puikiai sutaria su vaikais. "
+                  "Geriausias pasirinkimas kirpimui mašinėle ir greitam atsinaujinimui.")
+        # 1) broken photo -> empty so the data-script stock fallback renders (same as Mantas/Tomas)
+        for r in frappe.get_all("Barber", filters={"barber_name": "Lukas Jankauskas"}, fields=["name", "photo"]):
+            print("was photo:", repr(r.photo))
+            frappe.db.set_value("Barber", r.name, "photo", "")
+            print("photo cleared for", r.name)
+        # 2) repair the LT bio translation (was 'kazkas')
+        trs = frappe.get_all("Translation", filters={"language": "lt", "source_text": EN_BIO},
+                             fields=["name", "translated_text"])
+        for tr in trs:
+            print("was translation:", repr(tr.translated_text))
+            frappe.db.set_value("Translation", tr.name, "translated_text", LT_BIO)
+            print("translation fixed:", tr.name)
+        if not trs:
+            frappe.get_doc({"doctype": "Translation", "language": "lt",
+                            "source_text": EN_BIO, "translated_text": LT_BIO}).insert(ignore_permissions=True)
+            print("translation created")
+        # sweep any other stray 'kazkas' rows
+        for tr in frappe.get_all("Translation", filters={"translated_text": "kazkas"}, fields=["name", "source_text"]):
+            print("STRAY kazkas translation still present for source:", repr(tr.source_text))
+        frappe.translate.clear_cache()
+        frappe.db.commit()
+        print("done")
+    except Exception:
+        traceback.print_exc()

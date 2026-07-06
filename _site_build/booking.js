@@ -160,7 +160,7 @@
     function renderTime(){
       root.appendChild(h(L.selectTime));
       // professional dropdown
-      var sel=el("select","font-family:"+FONT+";font-size:15px;padding:12px 14px;border:1px solid "+BORDER+";border-radius:8px;width:100%;max-width:420px;color:"+INK+";margin:0 auto 20px;display:block;cursor:pointer;");
+      var sel=el("select","font-family:"+FONT+";font-size:15px;padding:12px 14px;border:1px solid "+BORDER+";border-radius:8px;width:100%;max-width:420px;color:"+INK+";background:"+CARD+";margin:0 auto 20px;display:block;cursor:pointer;");
       sel.appendChild(el("option","",{value:"",text:L.anyPro}));
       DATA.barbers.forEach(function(bb){ var o=el("option","",{value:bb.name,text:bb.barber_name}); if(bb.name===state.pro)o.setAttribute("selected","selected"); sel.appendChild(o); });
       sel.value=state.pro;

@@ -1,6 +1,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
 html,body{background:#0d0d0d;}
+body,input,button,textarea,select{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
 ::selection{background:#d4af37;color:#0d0d0d;}
 a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none !important; }
 .bl-menu{opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .18s ease,transform .18s ease,visibility .18s ease;pointer-events:none;}
@@ -8,6 +9,27 @@ a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none !import
 .bl-menu-link{transition:background .12s ease,color .12s ease;}
 .bl-menu-link:hover{background:#242017;color:#d4af37;}
 .bl-promo:hover{opacity:.9;}
+.bl-brand{transition:color .15s ease,opacity .15s ease;opacity:.85;}
+.bl-brand:hover{color:#d4af37;opacity:1;}
+.bl-faq>summary{list-style:none;}
+.bl-faq>summary::-webkit-details-marker{display:none;}
+.bl-faq-plus{transition:transform .2s ease;}
+.bl-faq[open] .bl-faq-plus{transform:rotate(45deg);}
+.bl-faq-qt{transition:color .15s ease;}
+.bl-faq:hover .bl-faq-qt{color:#d4af37;}
+.bl-barberpole{background:repeating-linear-gradient(-45deg,#c8102e 0 10px,#f5f5f5 10px 20px,#0a3161 20px 30px,#f5f5f5 30px 40px);}
+#booking-app select option{background:#1a1a1a;color:#f2ede4;}
+.bl-blogcard{transition:transform .15s ease,border-color .15s ease;}
+.bl-blogcard:hover{transform:translateY(-3px);border-color:#d4af37;}
+.bl-blog-content{font-size:16px;line-height:1.8;color:#c9c3b8;}
+.bl-blog-content p{margin:0 0 18px;}
+.bl-blog-content h2{font-family:'Playfair Display',Georgia,serif;color:#f2ede4;font-size:25px;font-weight:600;margin:32px 0 12px;letter-spacing:.005em;}
+.bl-blog-content h3{font-family:'Playfair Display',Georgia,serif;color:#f2ede4;font-size:20px;font-weight:600;margin:26px 0 10px;}
+.bl-blog-content a{color:#d4af37;text-decoration:underline !important;}
+.bl-blog-content ul,.bl-blog-content ol{margin:0 0 18px;padding-left:22px;}
+.bl-blog-content li{margin-bottom:8px;}
+.bl-blog-content img{max-width:100%;border-radius:12px;margin:18px 0;}
+.bl-blog-content strong,.bl-blog-content b{color:#f2ede4;}
 .bl-navitem>div:first-child:hover{color:#d4af37;}
 @media (min-width:577px){ .bl-mobile-menu{display:none !important;} }
 .bl-mobile-menu a:hover{ color:#d4af37; }

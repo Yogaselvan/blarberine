@@ -11,12 +11,13 @@ PAGES_DIR = os.path.join(SCRATCH, "pages")
 
 LANGS = ["lt", "en"]
 DEFAULT_LANG = "lt"
-KEYS = ["home", "services", "team", "about"]
+KEYS = ["home", "services", "team", "about", "blog"]
 
 def _routes(lang):
     p = "" if lang == DEFAULT_LANG else "en/"
     return {"home": p+"blarberine", "services": p+"blarberine/services",
-            "team": p+"blarberine/team", "about": p+"blarberine/about"}
+            "team": p+"blarberine/team", "about": p+"blarberine/about",
+            "blog": p+"blog"}
 ROUTES = {l: _routes(l) for l in LANGS}
 
 # palette (sampled from Treatwell)
@@ -42,11 +43,19 @@ PROMO=[
  "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=500&q=80",
  "https://images.unsplash.com/photo-1622287162716-f311baa1a2b8?auto=format&fit=crop&w=500&q=80"]
 
+# PLACEHOLDER pro-barber grooming brands — Mantas to confirm the real ones the shop uses.
+BRANDS=["American Crew","Reuzel","Proraso","Wahl","evo"]
+# PLACEHOLDER before/after pairs (known-good stock) — Mantas to send REAL client before/after photos.
+BEFORE_AFTER=[(WORK[2],WORK[0]),(WORK[3],WORK[1]),(WORK[5],WORK[4])]
+# DUMMY founder portrait — replace with the real founder's photo.
+FOUNDER_PHOTO="https://images.unsplash.com/photo-1503443207922-dff7d543fd0e?auto=format&fit=crop&w=760&q=80"
+
 # ---------------------------------------------------------------- i18n
 T = {
  "nav_services":{"en":"Services","lt":"Paslaugos"},
  "nav_barbers":{"en":"Barbers","lt":"Kirpėjai"},
  "nav_about":{"en":"About","lt":"Apie"},
+ "nav_blog":{"en":"Blog","lt":"Blogas"},
  "book_now":{"en":"Book now","lt":"Rezervuoti"},
  "book_appt":{"en":"Book an appointment","lt":"Rezervuoti vizitą"},
  "menu_services_head":{"en":"Services","lt":"Paslaugos"},
@@ -78,6 +87,77 @@ T = {
  "loading_services":{"en":"Loading services…","lt":"Kraunamos paslaugos…"},
  "our_work":{"en":"Our work","lt":"Mūsų darbai"},
  "loading_team":{"en":"Loading team…","lt":"Kraunama komanda…"},
+ "stat_years_num":{"en":"5+","lt":"5+"},                         # PLACEHOLDER — Mantas: real years open
+ "stat_years_lbl":{"en":"Years of experience","lt":"Metų patirties"},
+ "stat_barbers_lbl":{"en":"Pro barbers","lt":"Profesionalūs kirpėjai"},
+ "stat_clients_num":{"en":"3000+","lt":"3000+"},                 # PLACEHOLDER — Mantas: real client count
+ "stat_clients_lbl":{"en":"Happy clients","lt":"Patenkintų klientų"},
+ "ba_kicker":{"en":"Transformations","lt":"Pokyčiai"},
+ "ba_title":{"en":"Before & after","lt":"Prieš ir po"},
+ "ba_intro":{"en":"Real cuts from our chairs — a few recent transformations.",
+             "lt":"Tikri kirpimai iš mūsų kėdžių — keletas naujausių pokyčių."},
+ "ba_before":{"en":"Before","lt":"Prieš"},
+ "ba_after":{"en":"After","lt":"Po"},
+ "faq_kicker":{"en":"Good to know","lt":"Verta žinoti"},
+ "faq_title":{"en":"Frequently asked questions","lt":"Dažniausiai užduodami klausimai"},
+ "faq1_q":{"en":"How do I book an appointment?","lt":"Kaip užsiregistruoti vizitui?"},
+ "faq1_a":{"en":"Pick a service, a barber, a date and a time right here on the site — it takes under a minute, and you'll get a confirmation with your booking reference.",
+           "lt":"Pasirinkite paslaugą, kirpėją, datą ir laiką čia pat svetainėje — tai užtrunka mažiau nei minutę, o jūs gausite patvirtinimą su rezervacijos numeriu."},
+ "faq2_q":{"en":"How do I pay?","lt":"Kaip atsiskaityti?"},
+ "faq2_a":{"en":"You pay at the venue after your cut — cash or card. No card is needed to book online, and there is no online payment.",
+           "lt":"Atsiskaitote vietoje po kirpimo — grynaisiais arba kortele. Registruojantis internetu kortelės nereikia, o mokėjimų internetu nėra."},
+ "faq3_q":{"en":"Do you accept walk-ins?","lt":"Ar priimate be išankstinės registracijos?"},
+ "faq3_a":{"en":"Walk-ins are welcome whenever a chair is free, but we recommend booking ahead so your preferred barber and time are guaranteed.",
+           "lt":"Mielai priimame, kai yra laisva kėdė, tačiau rekomenduojame registruotis iš anksto, kad būtų garantuotas norimas kirpėjas ir laikas."},
+ "faq4_q":{"en":"How much does a haircut cost?","lt":"Kiek kainuoja kirpimas?"},
+ "faq4_a":{"en":"Haircuts start from €12, with classic cuts and skin fades up to €28. You can see the full price list on the services page.",
+           "lt":"Kirpimai prasideda nuo €12, klasikiniai kirpimai ir perėjimai — iki €28. Visą kainoraštį rasite paslaugų puslapyje."},
+ "faq5_q":{"en":"Do you cut children's hair?","lt":"Ar kerpate vaikus?"},
+ "faq5_a":{"en":"Yes — we offer kids' haircuts and are happy to work with younger clients in a relaxed, friendly setting.",
+           "lt":"Taip — turime vaikų kirpimo paslaugą ir mielai kerpame jaunuosius klientus jaukioje, draugiškoje aplinkoje."},
+ "faq6_q":{"en":"What languages do you speak?","lt":"Kokiomis kalbomis kalbate?"},
+ "faq6_a":{"en":"Our barbers speak Lithuanian and English, so you'll feel at home whether you're local or just visiting.",
+           "lt":"Mūsų kirpėjai kalba lietuvių ir anglų kalbomis, todėl jausitės patogiai — ar esate vietinis, ar svečias."},
+ "faq7_q":{"en":"Where are you located?","lt":"Kur mus rasti?"},
+ "faq7_a":{"en":"You'll find us at Kurpių g. 7 in the heart of Kaunas Old Town, a short walk from the Cathedral. Street parking is nearby.",
+           "lt":"Esame Kurpių g. 7, pačioje Kauno senamiesčio širdyje, vos kelios minutės nuo Katedros. Netoliese — vietos automobiliams gatvėje."},
+ # Founder card — DUMMY content, Mantas to replace name/role/quote/bio/photo with the real founder.
+ "founder_kicker":{"en":"Founder","lt":"Įkūrėjas"},
+ "founder_name":{"en":"Mantas Petrauskas","lt":"Mantas Petrauskas"},
+ "founder_role":{"en":"Founder & Head Barber","lt":"Įkūrėjas ir vyriausiasis kirpėjas"},
+ "founder_quote":{"en":"We don't chase speed — we chase the perfect cut, every single time.",
+                  "lt":"Nesivaikome greičio — siekiame tobulo kirpimo kiekvieną kartą."},
+ "founder_bio":{"en":"Mantas opened Blarberinė to bring proper, unhurried barbering to Kaunas. With over a decade behind the chair, he built a team that treats every haircut as craft and every client as a regular.",
+                "lt":"Mantas įkūrė Blarberinę, norėdamas Kaunui suteikti tikrą, neskubų kirpimo meną. Turėdamas daugiau nei dešimtmetį patirties, jis subūrė komandą, kuri kiekvieną kirpimą laiko amatu, o kiekvieną klientą — nuolatiniu."},
+ # Google rating badge — TEST values, replace with the real Google Business rating + review count + link.
+ "google_reviews_count":{"en":"Based on 120 Google reviews","lt":"Pagal 120 „Google“ atsiliepimų"},
+ "blog_kicker":{"en":"Blog","lt":"Blogas"},
+ "blog_title":{"en":"News & tips","lt":"Naujienos ir patarimai"},
+ "blog_intro":{"en":"Grooming tips, style guides and news from the chair.",
+               "lt":"Priežiūros patarimai, stiliaus gidai ir naujienos iš mūsų kėdžių."},
+ "blog_read":{"en":"Read →","lt":"Skaityti →"},
+ "blog_empty":{"en":"No posts yet — check back soon.","lt":"Kol kas įrašų nėra — užsukite netrukus."},
+ "findus_kicker":{"en":"Visit","lt":"Užsukite"},
+ "findus_title":{"en":"Find us in Kaunas","lt":"Raskite mus Kaune"},
+ "findus_sub":{"en":"Kurpių g. 7, Kaunas Old Town — a short walk from the Cathedral.",
+               "lt":"Kurpių g. 7, Kauno senamiestis — vos kelios minutės nuo Katedros."},
+ "craft_kicker":{"en":"Our craft","lt":"Kirpimo menas"},
+ "craft_title":{"en":"The art of a proper cut","lt":"Tikro kirpimo menas"},
+ "craft_intro":{"en":"We don't rush. Every visit is an experience, not just a service — precise, clean and built to last.",
+                "lt":"Neskubame. Kiekvienas apsilankymas — tai patirtis, ne tik paslauga: tikslu, švaru ir sukurta išlikti."},
+ "craft_p1_t":{"en":"Precision","lt":"Tikslumas"},
+ "craft_p1_d":{"en":"Every cut is targeted, clean and shaped to grow out well. We chase perfection, not speed.",
+               "lt":"Kiekvienas kirpimas tikslingas, švarus ir suformuotas taip, kad gražiai atželtų. Siekiame tobulumo, ne greitumo."},
+ "craft_p2_t":{"en":"Experience","lt":"Patirtis"},
+ "craft_p2_d":{"en":"Years behind the chair and an eye for detail — you're in steady, practised hands.",
+               "lt":"Metų metai prie kėdės ir dėmesys detalėms — esate patyrusiose rankose."},
+ "craft_p3_t":{"en":"Tradition","lt":"Tradicija"},
+ "craft_p3_d":{"en":"Classic methods paired with modern tools. We respect the craft and keep refining it.",
+               "lt":"Klasikiniai metodai su moderniais įrankiais. Gerbiame amatą ir nuolat jį tobuliname."},
+ "brands_kicker":{"en":"Products we use","lt":"Naudojami produktai"},
+ "brands_title":{"en":"Highest-quality cosmetics","lt":"Aukščiausios kokybės kosmetika"},
+ "brands_intro":{"en":"The professional brands we trust for every cut, shave and finish — so you leave looking your best.",
+                 "lt":"Profesionalūs prekės ženklai, kuriais pasitikime kiekvienam kirpimui, skutimui ir stiliui — kad išeitumėte atrodydami puikiai."},
  "reviews_kicker":{"en":"Reviews","lt":"Atsiliepimai"},
  "reviews_title":{"en":"What our clients say","lt":"Ką sako mūsų klientai"},
  "good_to_know":{"en":"Good to know","lt":"Verta žinoti"},
@@ -157,12 +237,13 @@ DATA_TR_LT = {
 }
 
 LANG = DEFAULT_LANG
-R_HOME=R_SERVICES=R_TEAM=R_ABOUT=BOOK_HREF=None
+R_HOME=R_SERVICES=R_TEAM=R_ABOUT=R_BLOG=BOOK_HREF=None
 def set_lang(lang):
-    global LANG,R_HOME,R_SERVICES,R_TEAM,R_ABOUT,BOOK_HREF
+    global LANG,R_HOME,R_SERVICES,R_TEAM,R_ABOUT,R_BLOG,BOOK_HREF
     LANG=lang
     r=ROUTES[lang]
     R_HOME,R_SERVICES,R_TEAM,R_ABOUT="/"+r["home"],"/"+r["services"],"/"+r["team"],"/"+r["about"]
+    R_BLOG="/"+r["blog"]
     BOOK_HREF=R_HOME+"#booking"
 def t(k):
     v=T.get(k,{})
@@ -218,8 +299,8 @@ def pill(label,href,*,solid=True,small=False):
 def stars(size=16,color=GOLD):
     return text("★★★★★",{"fontSize":"%dpx"%size,"color":color,"letterSpacing":"2px","lineHeight":"1"})
 
-def kicker(l): return text(l,{"fontSize":"12px","letterSpacing":"0.16em","textTransform":"uppercase","color":CORAL,"fontWeight":"700","marginBottom":"8px"})
-def h2(l): return text(l,{"fontFamily":HEAD,"fontSize":"30px","color":INK,"fontWeight":"600","marginBottom":"20px","letterSpacing":"0.01em"},tag="h2",mob={"fontSize":"23px","marginBottom":"16px"})
+def kicker(l): return text(l,{"fontSize":"12px","letterSpacing":"0.2em","textTransform":"uppercase","color":CORAL,"fontWeight":"700","marginBottom":"10px"})
+def h2(l): return text(l,{"fontFamily":HEAD,"fontSize":"32px","color":INK,"fontWeight":"600","marginBottom":"20px","letterSpacing":"0.005em","lineHeight":"1.2"},tag="h2",mob={"fontSize":"24px","marginBottom":"16px","lineHeight":"1.25"})
 
 def tri_bar(mt="0",mb="0"):
     seg=lambda c: blk("div",styles={"backgroundColor":c,"height":"4px","flex":"1"})
@@ -313,13 +394,15 @@ def nav(active="home"):
         text(t("our_barbers"),{"fontSize":"12px","color":MUTED,"fontWeight":"700","letterSpacing":"0.08em","textTransform":"uppercase","padding":"4px 10px 8px"}),
         barber_rep,_menu_link(t("meet_team_arrow"),R_TEAM)],width="240px")
 
-    about_link=link(t("nav_about"),R_ABOUT,{"fontSize":"13px","color":INK,"fontWeight":"600",
+    _plain_link=lambda label,href:link(label,href,{"fontSize":"13px","color":INK,"fontWeight":"600",
         "letterSpacing":"0.06em","textTransform":"uppercase","padding":"8px 2px","display":"inline-flex","alignItems":"center"})
+    about_link=_plain_link(t("nav_about"),R_ABOUT)
+    blog_link=_plain_link(t("nav_blog"),R_BLOG)
 
     center=blk("div",classes=["bl-navlinks"],children=[
         navitem(t("nav_services"),R_SERVICES,services_panel),
         navitem(t("nav_barbers"),R_TEAM,barbers_panel),
-        about_link, lang_dropdown(active)],
+        about_link, blog_link, lang_dropdown(active)],
         styles={"display":"flex","flexDirection":"row","gap":"22px","alignItems":"center"},
         mobileStyles={"display":"none"})
 
@@ -334,7 +417,7 @@ def nav(active="home"):
     def mlink(label,href):
         return link(label,href,{"fontSize":"15px","color":INK,"fontWeight":"600","padding":"15px 4px","width":"100%","borderBottom":"1px solid "+BORDER,"display":"block"})
     mobile_menu=blk("div",classes=["bl-mobile-menu"],children=[
-        mlink(t("nav_services"),R_SERVICES),mlink(t("nav_barbers"),R_TEAM),mlink(t("nav_about"),R_ABOUT),
+        mlink(t("nav_services"),R_SERVICES),mlink(t("nav_barbers"),R_TEAM),mlink(t("nav_about"),R_ABOUT),mlink(t("nav_blog"),R_BLOG),
         blk("div",children=[lang_switcher(active)],styles={"display":"flex","paddingTop":"12px","paddingBottom":"6px"}),
         blk("div",children=[pill(t("book_now"),BOOK_HREF)],styles={"display":"flex","width":"100%","paddingTop":"6px","paddingBottom":"6px"})],
         styles={"display":"none","position":"absolute","top":"100%","left":"0","right":"0","width":"100%","flexDirection":"column",
@@ -373,10 +456,12 @@ def footer():
         styles={"display":"flex","flexDirection":"row","justifyContent":"space-between","width":"100%","maxWidth":"1080px",
             "borderTop":"1px solid rgba(212,175,55,0.16)","paddingTop":"20px","marginTop":"36px","flexWrap":"wrap","gap":"8px"})
     inner=blk("div",children=[cols,bottom],styles=container("1080px"))
+    # Mantas's "little touch" — a subtle classic barber-pole stripe under the footer.
+    barberpole=blk("div",classes=["bl-barberpole"],styles={"width":"100%","height":"6px","flexShrink":"0"})
     return blk("footer",children=[tri_bar(),blk("div",children=[inner],styles={
         "display":"flex","flexDirection":"column","alignItems":"center","width":"100%",
         "paddingTop":"52px","paddingBottom":"40px","paddingLeft":"24px","paddingRight":"24px"},
-        mobileStyles={"paddingLeft":"16px","paddingRight":"16px"})],
+        mobileStyles={"paddingLeft":"16px","paddingRight":"16px"}),barberpole],
         styles={"display":"flex","flexDirection":"column","alignItems":"center","width":"100%","flexShrink":0,"backgroundColor":NAVY})
 
 # ================================================================= shared bits
@@ -411,7 +496,7 @@ def barbers_grid():
 
 # ================================================================= HERO
 def hero():
-    name=text("Blarberinė",{"fontFamily":HEAD,"fontSize":"46px","color":INK,"fontWeight":"600","letterSpacing":"0.08em","textTransform":"uppercase","marginBottom":"12px"},tag="h1",mob={"fontSize":"32px"})
+    name=text("Blarberinė",{"fontFamily":HEAD,"fontSize":"50px","color":INK,"fontWeight":"600","letterSpacing":"0.12em","lineHeight":"1.05","textTransform":"uppercase","marginBottom":"14px"},tag="h1",mob={"fontSize":"33px","letterSpacing":"0.08em"})
     rating=blk("div",children=[stars(18),text(t("trusted"),{"fontSize":"14px","color":MUTED,"fontWeight":"500"}),
         text(t("vilnius"),{"fontSize":"14px","color":MUTED})],
         styles={"display":"flex","flexDirection":"row","alignItems":"center","gap":"10px","marginBottom":"18px"},
@@ -459,7 +544,7 @@ def home():
     team=section([kicker(t("the_team")),h2(t("meet_barbers")),barbers_grid(),
         blk("div",children=[pill(t("meet_team_btn"),R_TEAM,solid=False)],styles={"display":"flex","justifyContent":"center","width":"100%","marginTop":"28px"})],
         bg=ALT)
-    return _body([nav("home"),hero(),info_bar(),popular,team,booking_section(),footer()])
+    return _body([nav("home"),hero(),info_bar(),stats_bar(),google_badge(),popular,team,before_after(),brands_strip(),faq_section(),booking_section(),bottom_map(),footer()])
 
 def services_page():
     app=blk("div",attributes={"id":"services-app"},
@@ -485,6 +570,29 @@ def team_page():
         section([h2(t("our_work")),grid],bg=ALT),
         reviews_section(),
         booking_cta(),footer()])
+
+def blog_card():
+    cover=blk("img",attributes={"src":WORK[0],"alt":""},
+        dynamicValues=[{"key":"cover_image","type":"attribute","property":"src","comesFrom":"dataScript"}],
+        styles={"width":"100%","height":"200px","objectFit":"cover","display":"block"})
+    meta=text("meta",{"fontSize":"11px","letterSpacing":"0.12em","textTransform":"uppercase","color":GOLD,"fontWeight":"700","marginBottom":"8px"},key="meta")
+    title=text("Title",{"fontFamily":HEAD,"fontSize":"20px","color":INK,"fontWeight":"600","lineHeight":"1.3","marginBottom":"8px","width":"auto"},key="title",tag="h3")
+    excerpt=text("Excerpt",{"fontSize":"14px","color":BODY,"lineHeight":"1.6","marginBottom":"14px","width":"auto"},key="excerpt")
+    read=text(t("blog_read"),{"fontSize":"13px","color":GOLD,"fontWeight":"700"})
+    body=blk("div",children=[meta,title,excerpt,read],styles={"display":"flex","flexDirection":"column","padding":"20px"})
+    return blk("a",children=[cover,body],classes=["bl-blogcard"],attributes={"href":"#"},
+        dynamicValues=[{"key":"href","type":"attribute","property":"href","comesFrom":"dataScript"}],
+        styles={"display":"flex","flexDirection":"column","backgroundColor":CARD,"border":"1px solid "+BORDER,
+            "borderRadius":"14px","overflow":"hidden","textDecoration":"none","width":"100%"})
+
+def blog_list():
+    grid=blk("div",children=[blog_card()],isRepeater=True,dataKey={"key":"blog_posts","comesFrom":"dataScript"},
+        styles={"display":"grid","gridTemplateColumns":"repeat(3, 1fr)","gap":"22px","width":"100%"},
+        mobileStyles={"gridTemplateColumns":"1fr"})
+    head=blk("div",children=[kicker(t("blog_kicker")),h2(t("blog_title")),
+        text(t("blog_intro"),{"fontSize":"15px","color":MUTED,"lineHeight":"1.6","width":"auto","marginBottom":"28px"})],
+        styles={"display":"flex","flexDirection":"column","width":"100%"})
+    return _body([nav("blog"),section([head,grid]),footer()])
 
 def about_page():
     gmaps="https://www.google.com/maps/search/?api=1&query=Kurpi%C5%B3+g.+7+Kaunas+Lithuania"
@@ -522,6 +630,8 @@ def about_page():
         styles={"display":"flex","flexDirection":"column","flex":"1.3","minWidth":"260px"})
     tworow=blk("div",children=[tbox,hbox],styles={"display":"flex","flexDirection":"row","gap":"56px","width":"100%","flexWrap":"wrap"},mobileStyles={"flexDirection":"column"})
     return _body([nav("about"),
+        craft_philosophy(),
+        founder_section(),
         section([kicker(t("good_to_know")),h2(t("about_shop")),maprow]),
         amenities(),
         section([tworow],bg=ALT),
@@ -569,6 +679,132 @@ def reviews_section():
         mobileStyles={"gridTemplateColumns":"1fr"})
     return section([kicker(t("reviews_kicker")),h2(t("reviews_title")),top,tri_bar(mt="8px",mb="28px"),cards],bg=BG)
 
+def stats_bar():
+    def item(num,label,num_key=None):
+        n=text(num,{"fontFamily":HEAD,"fontSize":"46px","color":GOLD,"fontWeight":"600","lineHeight":"1"},
+            key=num_key,tag="div",mob={"fontSize":"36px"})
+        l=text(label,{"fontSize":"12px","color":MUTED,"fontWeight":"700","letterSpacing":"0.12em",
+            "textTransform":"uppercase","marginTop":"12px","textAlign":"center","width":"auto"})
+        return blk("div",children=[n,l],styles={"display":"flex","flexDirection":"column","alignItems":"center",
+            "flex":"1","minWidth":"130px"})
+    items=[item(t("stat_years_num"),t("stat_years_lbl")),
+           item("0",t("stat_barbers_lbl"),num_key="stat_barbers"),
+           item(t("stat_clients_num"),t("stat_clients_lbl"))]
+    row=blk("div",children=items,styles={"display":"flex","flexDirection":"row","justifyContent":"center",
+        "alignItems":"flex-start","gap":"24px","width":"100%","flexWrap":"wrap"},mobileStyles={"gap":"28px"})
+    return section([row],bg=ALT,pad="40px")
+
+def before_after():
+    def half(src,lbl):
+        im=img(src,{"width":"100%","height":"280px","objectFit":"cover","display":"block"})
+        tag=text(lbl,{"position":"absolute","top":"12px","left":"12px","fontFamily":FONT,"fontSize":"11px",
+            "fontWeight":"700","letterSpacing":"0.14em","textTransform":"uppercase","color":INK,
+            "backgroundColor":"rgba(13,13,13,0.72)","paddingTop":"5px","paddingBottom":"5px",
+            "paddingLeft":"11px","paddingRight":"11px","borderRadius":"6px"})
+        return blk("div",children=[im,tag],styles={"position":"relative","flex":"1","minWidth":"0","overflow":"hidden"})
+    def pair(b,a):
+        return blk("div",children=[half(b,t("ba_before")),half(a,t("ba_after"))],
+            styles={"display":"flex","flexDirection":"row","gap":"2px","backgroundColor":GOLD,
+                "borderRadius":"14px","overflow":"hidden","border":"1px solid "+BORDER,"width":"100%"})
+    cards=[pair(b,a) for (b,a) in BEFORE_AFTER]
+    grid=blk("div",children=cards,styles={"display":"grid","gridTemplateColumns":"repeat(3, 1fr)","gap":"18px","width":"100%"},
+        mobileStyles={"gridTemplateColumns":"1fr","gap":"16px"})
+    head=blk("div",children=[kicker(t("ba_kicker")),h2(t("ba_title")),
+        text(t("ba_intro"),{"fontSize":"15px","color":MUTED,"lineHeight":"1.6","maxWidth":"620px","width":"auto","marginBottom":"24px"})],
+        styles={"display":"flex","flexDirection":"column","width":"100%"})
+    return section([head,grid],bg=BG)
+
+def founder_section():
+    photo=img(FOUNDER_PHOTO,{"width":"40%","height":"440px","objectFit":"cover","borderRadius":"16px","flexShrink":"0"})
+    photo["mobileStyles"]={"width":"100%","height":"320px"}
+    name=text(t("founder_name"),{"fontFamily":HEAD,"fontSize":"27px","color":INK,"fontWeight":"600","marginBottom":"4px"},tag="h3")
+    role=text(t("founder_role"),{"fontSize":"12px","color":GOLD,"fontWeight":"700","letterSpacing":"0.14em","textTransform":"uppercase","marginBottom":"20px"})
+    quote=text("“"+t("founder_quote")+"”",{"fontFamily":HEAD,"fontSize":"23px","color":INK,"fontStyle":"italic","lineHeight":"1.4","marginBottom":"18px","width":"auto"})
+    bio=text(t("founder_bio"),{"fontSize":"15px","color":BODY,"lineHeight":"1.7","width":"auto"})
+    txt=blk("div",children=[kicker(t("founder_kicker")),name,role,quote,bio],
+        styles={"display":"flex","flexDirection":"column","flex":"1.2","minWidth":"280px","justifyContent":"center"})
+    row=blk("div",children=[photo,txt],styles={"display":"flex","flexDirection":"row","gap":"48px","width":"100%","alignItems":"center"},
+        mobileStyles={"flexDirection":"column","gap":"24px"})
+    return section([row],bg=BG)
+
+def google_badge():
+    goog=[("G","#4285F4"),("o","#EA4335"),("o","#FBBC05"),("g","#4285F4"),("l","#34A853"),("e","#EA4335")]
+    letters=[text(ch,{"fontFamily":FONT,"fontSize":"21px","fontWeight":"700","color":c,"lineHeight":"1"}) for ch,c in goog]
+    wordmark=blk("div",children=letters,styles={"display":"flex","flexDirection":"row","alignItems":"center"})
+    st=text("★★★★★",{"fontSize":"18px","color":"#fbbc05","letterSpacing":"2px","lineHeight":"1"})
+    rating=text("5.0",{"fontFamily":FONT,"fontSize":"20px","fontWeight":"700","color":"#1a1a1a","lineHeight":"1"})
+    cnt=text(t("google_reviews_count"),{"fontSize":"13px","color":"#5f6368","fontWeight":"500"})
+    inner=blk("div",children=[wordmark,st,rating,cnt],styles={"display":"flex","flexDirection":"row","alignItems":"center",
+        "gap":"14px","flexWrap":"wrap","justifyContent":"center"})
+    link_="https://www.google.com/maps/search/?api=1&query=Blarberin%C4%97+Kaunas"  # TEST link
+    card=blk("a",attributes={"href":link_,"target":"_blank"},children=[inner],
+        styles={"display":"inline-flex","alignItems":"center","backgroundColor":"#ffffff","borderRadius":"12px",
+        "paddingTop":"14px","paddingBottom":"14px","paddingLeft":"24px","paddingRight":"24px","textDecoration":"none",
+        "boxShadow":"0 2px 18px rgba(0,0,0,0.35)"})
+    wrap=blk("div",children=[card],styles={"display":"flex","justifyContent":"center","width":"100%"})
+    return section([wrap],bg=BG,pad="30px")
+
+def craft_philosophy():
+    def pillar(num,title,desc):
+        n=text(num,{"fontFamily":HEAD,"fontSize":"34px","color":GOLD,"fontWeight":"600","lineHeight":"1","marginBottom":"14px"})
+        tt=text(title,{"fontFamily":HEAD,"fontSize":"21px","color":INK,"fontWeight":"600","marginBottom":"8px","letterSpacing":"0.01em"})
+        dd=text(desc,{"fontSize":"15px","color":BODY,"lineHeight":"1.65","width":"auto"})
+        return blk("div",children=[n,tt,dd],styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"220px",
+            "paddingTop":"18px","borderTop":"2px solid rgba(212,175,55,0.4)"})
+    row=blk("div",children=[pillar("01",t("craft_p1_t"),t("craft_p1_d")),
+        pillar("02",t("craft_p2_t"),t("craft_p2_d")),
+        pillar("03",t("craft_p3_t"),t("craft_p3_d"))],
+        styles={"display":"flex","flexDirection":"row","gap":"40px","width":"100%","flexWrap":"wrap"},
+        mobileStyles={"flexDirection":"column","gap":"28px"})
+    head=blk("div",children=[kicker(t("craft_kicker")),h2(t("craft_title")),
+        text(t("craft_intro"),{"fontSize":"16px","color":MUTED,"lineHeight":"1.65","maxWidth":"640px","width":"auto","marginBottom":"32px"})],
+        styles={"display":"flex","flexDirection":"column","width":"100%"})
+    return section([head,row],bg=ALT)
+
+def faq_section():
+    items=[]
+    for i in range(1,8):
+        qt=text(t("faq%d_q"%i),{"fontSize":"16px","color":INK,"fontWeight":"600","lineHeight":"1.4",
+            "flex":"1","minWidth":"0","width":"auto"},tag="span",classes=["bl-faq-qt"])
+        plus=text("+",{"fontSize":"24px","color":GOLD,"fontWeight":"300","lineHeight":"1",
+            "flexShrink":"0","marginLeft":"18px"},tag="span",classes=["bl-faq-plus"])
+        summary=blk("summary",children=[qt,plus],classes=["bl-faq-q"],styles={"display":"flex","flexDirection":"row",
+            "justifyContent":"space-between","alignItems":"center","width":"100%","cursor":"pointer",
+            "paddingTop":"18px","paddingBottom":"18px","listStyle":"none"})
+        ans=text(t("faq%d_a"%i),{"fontSize":"15px","color":BODY,"lineHeight":"1.7","width":"auto",
+            "paddingBottom":"20px","maxWidth":"680px"})
+        det=blk("details",children=[summary,ans],classes=["bl-faq"],
+            styles={"borderBottom":"1px solid "+BORDER,"width":"100%"},
+            attributes=({"open":"open"} if i==1 else None))
+        items.append(det)
+    col=blk("div",children=items,styles={"display":"flex","flexDirection":"column","width":"100%","maxWidth":"760px"})
+    return section([kicker(t("faq_kicker")),h2(t("faq_title")),col],bg=BG)
+
+def brands_strip():
+    logos=[]
+    for nm in BRANDS:
+        logos.append(text(nm.upper(),{"fontFamily":HEAD,"fontSize":"22px","fontWeight":"600","color":MUTED,
+            "letterSpacing":"0.14em","whiteSpace":"nowrap","lineHeight":"1"},classes=["bl-brand"]))
+    row=blk("div",children=logos,styles={"display":"flex","flexDirection":"row","flexWrap":"wrap",
+        "justifyContent":"center","alignItems":"center","columnGap":"48px","rowGap":"22px","width":"100%","marginTop":"8px"},
+        mobileStyles={"columnGap":"28px","rowGap":"18px"})
+    head=blk("div",children=[kicker(t("brands_kicker")),h2(t("brands_title")),
+        text(t("brands_intro"),{"fontSize":"15px","color":MUTED,"lineHeight":"1.6","maxWidth":"620px","width":"auto","marginBottom":"6px"})],
+        styles={"display":"flex","flexDirection":"column","alignItems":"center","textAlign":"center","width":"100%","marginBottom":"26px"})
+    return section([head,row],bg=ALT)
+
+def bottom_map():
+    q="Kurpi%C5%B3+g.+7+Kaunas"
+    iframe=blk("iframe",attributes={"src":"https://maps.google.com/maps?q="+q+"&z=16&output=embed",
+        "loading":"lazy","title":"Blarberinė — Kurpių g. 7, Kaunas","allowfullscreen":""},
+        styles={"width":"100%","height":"100%","border":"0","display":"block"})
+    box=blk("div",children=[iframe],styles={"width":"100%","height":"400px","overflow":"hidden",
+        "borderRadius":"16px","border":"1px solid "+BORDER},mobileStyles={"height":"300px"})
+    head=blk("div",children=[kicker(t("findus_kicker")),h2(t("findus_title")),
+        text(t("findus_sub"),{"fontSize":"15px","color":MUTED,"lineHeight":"1.6","width":"auto","marginBottom":"26px","textAlign":"center"})],
+        styles={"display":"flex","flexDirection":"column","alignItems":"center","textAlign":"center","width":"100%"})
+    return section([head,box],bg=BG,width="1180px")
+
 def booking_cta():
     card=blk("div",children=[kicker(t("reserve_chair")),h2(t("ready_fresh")),
         text(t("book_min"),{"fontSize":"16px","color":BODY,"marginBottom":"20px","textAlign":"center","width":"100%","maxWidth":"460px"}),
@@ -593,6 +829,7 @@ def booking_section():
 NAV_CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
 html,body{background:#0d0d0d;}
+body,input,button,textarea,select{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
 ::selection{background:#d4af37;color:#0d0d0d;}
 a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none !important; }
 .bl-menu{opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .18s ease,transform .18s ease,visibility .18s ease;pointer-events:none;}
@@ -600,6 +837,27 @@ a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none !import
 .bl-menu-link{transition:background .12s ease,color .12s ease;}
 .bl-menu-link:hover{background:#242017;color:#d4af37;}
 .bl-promo:hover{opacity:.9;}
+.bl-brand{transition:color .15s ease,opacity .15s ease;opacity:.85;}
+.bl-brand:hover{color:#d4af37;opacity:1;}
+.bl-faq>summary{list-style:none;}
+.bl-faq>summary::-webkit-details-marker{display:none;}
+.bl-faq-plus{transition:transform .2s ease;}
+.bl-faq[open] .bl-faq-plus{transform:rotate(45deg);}
+.bl-faq-qt{transition:color .15s ease;}
+.bl-faq:hover .bl-faq-qt{color:#d4af37;}
+.bl-barberpole{background:repeating-linear-gradient(-45deg,#c8102e 0 10px,#f5f5f5 10px 20px,#0a3161 20px 30px,#f5f5f5 30px 40px);}
+#booking-app select option{background:#1a1a1a;color:#f2ede4;}
+.bl-blogcard{transition:transform .15s ease,border-color .15s ease;}
+.bl-blogcard:hover{transform:translateY(-3px);border-color:#d4af37;}
+.bl-blog-content{font-size:16px;line-height:1.8;color:#c9c3b8;}
+.bl-blog-content p{margin:0 0 18px;}
+.bl-blog-content h2{font-family:'Playfair Display',Georgia,serif;color:#f2ede4;font-size:25px;font-weight:600;margin:32px 0 12px;letter-spacing:.005em;}
+.bl-blog-content h3{font-family:'Playfair Display',Georgia,serif;color:#f2ede4;font-size:20px;font-weight:600;margin:26px 0 10px;}
+.bl-blog-content a{color:#d4af37;text-decoration:underline !important;}
+.bl-blog-content ul,.bl-blog-content ol{margin:0 0 18px;padding-left:22px;}
+.bl-blog-content li{margin-bottom:8px;}
+.bl-blog-content img{max-width:100%;border-radius:12px;margin:18px 0;}
+.bl-blog-content strong,.bl-blog-content b{color:#f2ede4;}
 .bl-navitem>div:first-child:hover{color:#d4af37;}
 @media (min-width:577px){ .bl-mobile-menu{display:none !important;} }
 .bl-mobile-menu a:hover{ color:#d4af37; }
@@ -618,6 +876,19 @@ def make_data_script(lang):
     else:
         tr_src = "TR = {}"
     mins = "min" if lang == "lt" else "mins"
+    blog_src = ('posts = frappe.db.get_all("Blog Post", filters={"published": 1, "language": "%s"},\n'
+                '    fields=["title","route","excerpt","cover_image","author","published_on"], order_by="published_on desc")\n'
+                'for p in posts:\n'
+                '    p["href"] = "/" + p["route"]\n'
+                '    mb = []\n'
+                '    if p.get("published_on"): mb.append(str(p["published_on"]))\n'
+                '    if p.get("author"): mb.append(p["author"])\n'
+                '    p["meta"] = " · ".join(mb)\n'
+                '    if not p.get("cover_image"): p["cover_image"] = "%s"\n'
+                'data.blog_posts = posts') % (lang, GALLERY[0])
+    # extra social/OG tags safe for every page in this language (Builder merges page_data.metatags)
+    _locale = "lt_LT" if lang == "lt" else "en_US"
+    blog_src += '\ndata.metatags = {"og:site_name": "Blarberinė", "og:locale": "%s"}' % _locale
     return '''# Blarberine shared page data (%s) — live from DocTypes.
 %s
 def trx(s, TR=TR):
@@ -636,6 +907,7 @@ for i,b in enumerate(barbers):
     if not b.get("photo"): b["photo"]=fb[i%%len(fb)]
     b["bio"]=trx(b.get("bio") or "")
 data.barbers=barbers
+data.stat_barbers="%%d"%%len(barbers)
 
 categories=frappe.db.get_all("Service Category", fields=["name","category_name","description"], order_by="category_name asc")
 popular=[]
@@ -676,10 +948,43 @@ for st in [5,4,3,2,1]:
             cc=cc+1
     brk.append({"label":"%%d"%%st,"stars":"★"*st,"count":"%%d"%%cc,"pct":("%%d%%%%"%%int(100*cc/n)) if n else "0%%"})
 data.review_breakdown=brk
+%s
 ''' % (lang, tr_src, mins, ("nuo" if lang=="lt" else "from"),
-       ("atsiliepimai" if lang=="lt" else "reviews"))
+       ("atsiliepimai" if lang=="lt" else "reviews"), blog_src)
 
-PAGES={"home":home,"services":services_page,"team":team_page,"about":about_page}
+PAGES={"home":home,"services":services_page,"team":team_page,"about":about_page,"blog":blog_list}
+
+# ---- SEO: preview image (1200x630) shipped in the app so it deploys with the code ----
+OG_IMAGE="/assets/blarberine/images/blarberine-og.jpg"
+
+# ---- SEO: (title, meta description) per page & language ----
+SEO={
+ "home":{
+   "lt":("Blarberinė — vyriška kirpykla Kaune | Kirpimai ir barzdos",
+         "Vyriška kirpykla Kauno senamiestyje (Kurpių g. 7). Klasikiniai kirpimai, perėjimai, barzdos formavimas ir skutimas karštu rankšluosčiu. Registruokitės internetu — atsiskaitoma vietoje."),
+   "en":("Blarberinė — Men's Barbershop in Kaunas | Cuts & Beards",
+         "Men's barbershop in Kaunas Old Town (Kurpių g. 7). Classic cuts, skin fades, beard shaping and hot-towel shaves. Book online — pay at the venue.")},
+ "services":{
+   "lt":("Paslaugos ir kainos — Blarberinė Kaunas",
+         "Blarberinės kainoraštis: vyriški kirpimai nuo €12, barzdos priežiūra, perėjimai ir skutimas. Registruokitės internetu, atsiskaitoma vietoje."),
+   "en":("Services & Prices — Blarberinė Kaunas",
+         "Blarberinė price list: men's haircuts from €12, beard care, skin fades and shaves. Book online, pay at the venue in Kaunas.")},
+ "team":{
+   "lt":("Kirpėjai — Blarberinė Kaunas",
+         "Susipažinkite su Blarberinės kirpėjais Kaune. Patyrę meistrai, klasikiniai ir modernūs kirpimai. Rezervuokite savo meistrą internetu."),
+   "en":("Our Barbers — Blarberinė Kaunas",
+         "Meet the barbers at Blarberinė in Kaunas — experienced masters, classic and modern cuts. Book your barber online.")},
+ "about":{
+   "lt":("Apie mus — Blarberinė Kaunas",
+         "Blarberinė — kvartalo kirpykla Kauno senamiestyje. Meistrystė, tradicijos ir dėmesys detalėms. Kurpių g. 7, Kaunas."),
+   "en":("About — Blarberinė Kaunas",
+         "Blarberinė — a neighbourhood barbershop in Kaunas Old Town. Craft, tradition and attention to detail. Kurpių g. 7, Kaunas.")},
+ "blog":{
+   "lt":("Blogas — patarimai ir naujienos | Blarberinė Kaunas",
+         "Vyriškos priežiūros patarimai, stiliaus gidai ir naujienos iš Blarberinės kirpyklos Kaune."),
+   "en":("Blog — grooming tips & news | Blarberinė Kaunas",
+         "Men's grooming tips, style guides and news from Blarberinė barbershop in Kaunas.")},
+}
 
 if __name__=="__main__":
     os.makedirs(PAGES_DIR,exist_ok=True)
@@ -691,8 +996,10 @@ if __name__=="__main__":
             tree=PAGES[key]()
             fn="%s__%s.json"%(lang,key)
             with open(os.path.join(PAGES_DIR,fn),"w") as f: json.dump(tree,f)
+            seo_title,seo_desc=SEO[key][lang]
             manifest.append({"lang":lang,"key":key,"route":ROUTES[lang][key],"file":fn,
-                             "data_script":"page_data_%s.py"%lang,"title":"Blarberinė — %s (%s)"%(key,lang)})
+                             "data_script":"page_data_%s.py"%lang,"title":seo_title,
+                             "seo_title":seo_title,"seo_desc":seo_desc,"seo_image":OG_IMAGE})
         with open(os.path.join(SCRATCH,"page_data_%s.py"%lang),"w") as f: f.write(make_data_script(lang))
     with open(os.path.join(SCRATCH,"nav.css"),"w") as f: f.write(NAV_CSS)
     with open(os.path.join(PAGES_DIR,"manifest.json"),"w") as f: json.dump(manifest,f,indent=1)
