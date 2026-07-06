@@ -954,15 +954,16 @@ data.review_breakdown=brk
 
 PAGES={"home":home,"services":services_page,"team":team_page,"about":about_page,"blog":blog_list}
 
-# ---- SEO: preview image (1200x630) shipped in the app so it deploys with the code ----
+# ---- SEO: preview image (1200x630) + favicon shipped in the app so they deploy with the code ----
 OG_IMAGE="/assets/blarberine/images/blarberine-og.jpg"
+FAVICON="/assets/blarberine/images/favicon.png"
 
 # ---- SEO: (title, meta description) per page & language ----
 SEO={
  "home":{
-   "lt":("Blarberinė — vyriška kirpykla Kaune | Kirpimai ir barzdos",
+   "lt":("Blarberinė – Barbershop Kaune | Kirpimai, barzdos, skutimas",
          "Vyriška kirpykla Kauno senamiestyje (Kurpių g. 7). Klasikiniai kirpimai, perėjimai, barzdos formavimas ir skutimas karštu rankšluosčiu. Registruokitės internetu — atsiskaitoma vietoje."),
-   "en":("Blarberinė — Men's Barbershop in Kaunas | Cuts & Beards",
+   "en":("Blarberinė – Barbershop Kaunas | Cuts, Beards & Shaves",
          "Men's barbershop in Kaunas Old Town (Kurpių g. 7). Classic cuts, skin fades, beard shaping and hot-towel shaves. Book online — pay at the venue.")},
  "services":{
    "lt":("Paslaugos ir kainos — Blarberinė Kaunas",
@@ -999,7 +1000,8 @@ if __name__=="__main__":
             seo_title,seo_desc=SEO[key][lang]
             manifest.append({"lang":lang,"key":key,"route":ROUTES[lang][key],"file":fn,
                              "data_script":"page_data_%s.py"%lang,"title":seo_title,
-                             "seo_title":seo_title,"seo_desc":seo_desc,"seo_image":OG_IMAGE})
+                             "seo_title":seo_title,"seo_desc":seo_desc,"seo_image":OG_IMAGE,
+                             "seo_favicon":FAVICON})
         with open(os.path.join(SCRATCH,"page_data_%s.py"%lang),"w") as f: f.write(make_data_script(lang))
     with open(os.path.join(SCRATCH,"nav.css"),"w") as f: f.write(NAV_CSS)
     with open(os.path.join(PAGES_DIR,"manifest.json"),"w") as f: json.dump(manifest,f,indent=1)

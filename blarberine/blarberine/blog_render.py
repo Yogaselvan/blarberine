@@ -104,6 +104,7 @@ def render_post(doc):
     page.meta_description = (doc.meta_description or doc.excerpt or "")[:500]
     # per-post preview image = its cover, else the site default OG image
     page.meta_image = doc.cover_image or "/assets/blarberine/images/blarberine-og.jpg"
+    page.favicon = "/assets/blarberine/images/favicon.png"
     page.blocks = new_blocks
     page.draft_blocks = new_blocks
     page.page_data_script = src.page_data_script

@@ -435,6 +435,8 @@ def run_all(email="yogaselvansaravanan557@gmail.com"):
             doc.meta_description = e["seo_desc"]
         if e.get("seo_image"):
             doc.meta_image = e["seo_image"]
+        if e.get("seo_favicon"):
+            doc.favicon = e["seo_favicon"]
         have = [r.builder_script for r in (doc.get("client_scripts") or [])]
         for sname in script_names:
             if sname not in have:
@@ -443,6 +445,17 @@ def run_all(email="yogaselvansaravanan557@gmail.com"):
         frappe.db.set_value("Builder Page", name, "owner", email, update_modified=False)
         frappe.db.commit()
         print("PUBLISHED %-2s %-8s -> /%s" % (e["lang"], e["key"], e["route"]))
+
+    # site-wide default favicon (covers "My Page" default + any page without its own)
+    try:
+        bs = frappe.get_doc("Builder Settings", "Builder Settings")
+        bs.favicon = "/assets/blarberine/images/favicon.png"
+        bs.save(ignore_permissions=True)
+        frappe.db.commit()
+        print("set Builder Settings favicon")
+    except Exception:
+        import traceback
+        traceback.print_exc()
 
 
 def rerender_blog():
@@ -470,6 +483,24 @@ def translate_existing():
             child = frappe.get_doc("Blog Post", child_name)
             print("SRC [%s]: %s" % (doc.language, doc.title))
             print("  -> [%s]: %s | %s | published=%s" % (child.language, child.title, child.route, child.published))
+        frappe.db.commit()
+        print("done")
+    except Exception:
+        traceback.print_exc()
+
+
+def delete_rosyai():
+    """Delete the 'Rosy-ai' test posts (child first to avoid the link constraint) + their pages."""
+    import traceback
+    try:
+        # translated child(ren) first (their source_post links to the source)
+        for c in frappe.get_all("Blog Post", filters={"title": ["like", "Rosy%"], "source_post": ["is", "set"]},
+                                fields=["name", "title"]):
+            frappe.delete_doc("Blog Post", c.name, ignore_permissions=True, force=True)
+            print("deleted:", c.title, "(translated)")
+        for c in frappe.get_all("Blog Post", filters={"title": ["like", "Rosy%"]}, fields=["name", "title"]):
+            frappe.delete_doc("Blog Post", c.name, ignore_permissions=True, force=True)
+            print("deleted:", c.title, "(source)")
         frappe.db.commit()
         print("done")
     except Exception:
