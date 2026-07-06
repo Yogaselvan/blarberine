@@ -668,7 +668,10 @@ data.review_count_display="%%d %s"%%n
 data.review_stars="★"*int(round(avg)) if n else ""
 brk=[]
 for st in [5,4,3,2,1]:
-    cc=len([x for x in revs if int(x.get("rating") or 0)==st])
+    cc=0
+    for x in revs:
+        if int(x.get("rating") or 0)==st:
+            cc+=1
     brk.append({"label":"%%d"%%st,"stars":"★"*st,"count":"%%d"%%cc,"pct":("%%d%%%%"%%int(100*cc/n)) if n else "0%%"})
 data.review_breakdown=brk
 ''' % (lang, tr_src, mins, ("nuo" if lang=="lt" else "from"),
