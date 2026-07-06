@@ -148,6 +148,12 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
+scheduler_events = {
+	"daily": [
+		"blarberine.blarberine.api.send_reminders",
+	],
+}
+
 # scheduler_events = {
 # 	"all": [
 # 		"blarberine.tasks.all"

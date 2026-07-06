@@ -5,6 +5,8 @@
 # website (anonymous visitors, not logged-in Desk users) calls them during
 # the booking flow.
 
+import re
+
 import frappe
 from frappe import _
 
@@ -13,6 +15,12 @@ WEEKDAYS = [
     "Monday", "Tuesday", "Wednesday",
     "Thursday", "Friday", "Saturday", "Sunday",
 ]
+
+# A same-day slot must start at least this many minutes from now.
+MIN_LEAD_MINUTES = 15
+
+SHOP_NAME = "Blarberinė"
+SHOP_ADDRESS = "Kurpių g. 7, Kaunas"
 
 
 def _to_minutes(value):
@@ -37,6 +45,21 @@ def _to_minutes(value):
 def _fmt(minutes):
     """Minutes-since-midnight -> 'HH:MM'."""
     return "%02d:%02d" % (minutes // 60, minutes % 60)
+
+
+def _lead_cutoff(date_obj):
+    """Earliest bookable start (minutes-since-midnight) for `date_obj`.
+
+    Past dates get an impossible cutoff (whole day unbookable); today gets
+    now + MIN_LEAD_MINUTES in the site's timezone; future dates get 0.
+    """
+    now = frappe.utils.now_datetime()
+    today = now.date()
+    if date_obj < today:
+        return 24 * 60 + 1
+    if date_obj == today:
+        return now.hour * 60 + now.minute + MIN_LEAD_MINUTES
+    return 0
 
 
 def _time_off_intervals(barber, date_obj):
@@ -121,6 +144,7 @@ def get_available_slots(barber, service, date):
         return []  # barber doesn't work that day
 
     busy = _busy_intervals(barber, date_obj)
+    cutoff = _lead_cutoff(date_obj)
 
     slots = []
     for row in wh:
@@ -131,7 +155,7 @@ def get_available_slots(barber, service, date):
         t = start_min
         while t + duration <= end_min:
             overlaps = any(t < b_end and (t + duration) > b_start for (b_start, b_end) in busy)
-            if not overlaps:
+            if t >= cutoff and not overlaps:
                 slots.append(_fmt(t))
             t += duration
 
@@ -217,6 +241,8 @@ def create_booking(customer_name, phone=None, email=None, barber=None,
     })
     appt.insert(ignore_permissions=True)
     frappe.db.commit()
+    _send_booking_emails([appt.name], customer_name, phone, email, barber,
+                         [service], date_obj, start_label, end_label)
 
     return {
         "success": True,
@@ -320,11 +346,12 @@ def _free_block_starts(barber, date_obj, total, step=15):
     if not windows:
         return []
     busy = _busy_intervals(barber, date_obj)
+    cutoff = _lead_cutoff(date_obj)
     starts = []
     for (ws, we) in windows:
         t = ws
         while t + total <= we:
-            if not any(t < b_end and (t + total) > b_start for (b_start, b_end) in busy):
+            if t >= cutoff and not any(t < b_end and (t + total) > b_start for (b_start, b_end) in busy):
                 starts.append(t)
             t += step
     return starts
@@ -414,5 +441,181 @@ def create_basket_booking(customer_name, services, date, start_time, phone=None,
             "end_time": _fmt(t + dur) + ":00", "status": "Scheduled"})
         appt.insert(ignore_permissions=True); appts.append(appt.name); t += dur
     frappe.db.commit()
+    _send_booking_emails(appts, customer_name, phone, email, barber, services,
+                         date_obj, _fmt(start_min), _fmt(start_min + total))
     return {"success": True, "appointments": appts, "barber": barber,
             "start_time": _fmt(start_min), "end_time": _fmt(start_min + total)}
+
+
+# ---------------------------------------------------------------------------
+# Booking notification emails: confirmation to the customer, alert to the shop.
+# ---------------------------------------------------------------------------
+
+EMAIL_STRINGS = {
+    "lt": {
+        "subject": "Rezervacija patvirtinta – {shop}, {date} {time}",
+        "heading": "Rezervacija patvirtinta",
+        "intro": "Sveiki, {name}! Jūsų vizitas užregistruotas. Lauksime jūsų.",
+        "date": "Data", "time": "Laikas", "barber": "Meistras",
+        "services": "Paslaugos", "address": "Adresas", "reference": "Užsakymo nr.",
+        "pay": "Atsiskaitymas vietoje – grynaisiais arba kortele.",
+        "change": "Norite pakeisti ar atšaukti vizitą? Atsakykite į šį laišką.",
+    },
+    "en": {
+        "subject": "Booking confirmed – {shop}, {date} {time}",
+        "heading": "Booking confirmed",
+        "intro": "Hi {name}! Your appointment is booked. See you soon.",
+        "date": "Date", "time": "Time", "barber": "Professional",
+        "services": "Services", "address": "Address", "reference": "Reference",
+        "pay": "Pay at the venue – cash or card.",
+        "change": "Need to change or cancel? Just reply to this email.",
+    },
+}
+
+
+def _booking_lang():
+    """lt/en inferred from the page the booking was made on (Referer header) —
+    the widget itself doesn't send a language."""
+    try:
+        ref = frappe.request.headers.get("Referer") or ""
+    except Exception:
+        ref = ""
+    return "en" if re.search(r"/en([/?#]|$)", ref) else "lt"
+
+
+def _email_html(heading, intro, rows, notes):
+    body_rows = "".join(
+        '<tr><td style="padding:7px 16px 7px 0;color:#948c7a;font-size:13px;'
+        'white-space:nowrap;vertical-align:top">%s</td>'
+        '<td style="padding:7px 0;color:#1c1a15;font-size:14px;font-weight:600">%s</td></tr>'
+        % (label, value)
+        for (label, value) in rows if value
+    )
+    note_html = "".join(
+        '<p style="margin:6px 0 0;color:#6b6455;font-size:13px;line-height:1.5">%s</p>' % n
+        for n in notes if n
+    )
+    return (
+        '<div style="background:#f6f2ea;padding:28px 16px;font-family:Georgia,serif">'
+        '<div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:12px;'
+        'border:1px solid #e6dfd0;overflow:hidden">'
+        '<div style="background:#0d0d0d;padding:20px 28px">'
+        '<span style="color:#d4af37;font-size:20px;letter-spacing:0.08em">' + SHOP_NAME + "</span></div>"
+        '<div style="padding:24px 28px 28px">'
+        '<h2 style="margin:0 0 6px;color:#1c1a15;font-size:22px;font-weight:600">' + heading + "</h2>"
+        '<p style="margin:0 0 18px;color:#6b6455;font-size:14px;line-height:1.5">' + intro + "</p>"
+        '<table style="border-collapse:collapse">' + body_rows + "</table>"
+        '<div style="border-top:1px solid #e6dfd0;margin-top:18px;padding-top:14px">'
+        + note_html + "</div></div></div></div>"
+    )
+
+
+def _safe_send(**kwargs):
+    """frappe.sendmail that can never break the booking flow: failures are
+    logged and any msgprint pushed by the mail stack is popped so it doesn't
+    leak into the API response's _server_messages."""
+    try:
+        frappe.sendmail(**kwargs)
+    except Exception:
+        frappe.clear_last_message()
+        frappe.log_error(frappe.get_traceback(), "Blarberine booking email failed")
+
+
+def _send_booking_emails(appointments, customer_name, phone, email, barber,
+                         services, date_obj, start_label, end_label, lang=None):
+    """Queue the customer confirmation and the shop notification. A mail
+    problem must never kill a valid appointment, so everything is wrapped."""
+    try:
+        lang = lang or _booking_lang()
+        binfo = frappe.db.get_value("Barber", barber, ["barber_name", "email"], as_dict=True) or {}
+        svc_bits = []
+        for s in services:
+            row = frappe.db.get_value("Service", s, ["service_name", "duration", "price"], as_dict=True)
+            if row:
+                svc_bits.append("%s (%d min) – %s" % (
+                    _tr(row.service_name, lang), int(row.duration or 0), _eur(row.price)))
+        svc_html = "<br>".join(svc_bits)
+        date_label = frappe.utils.formatdate(date_obj, "dd.MM.yyyy")
+        time_label = "%s–%s" % (start_label, end_label)
+        notify = frappe.conf.get("blarberine_notify_email")
+
+        if email:
+            s = EMAIL_STRINGS.get(lang) or EMAIL_STRINGS["lt"]
+            rows = [
+                (s["date"], date_label), (s["time"], time_label),
+                (s["barber"], binfo.get("barber_name") or barber),
+                (s["services"], svc_html), (s["address"], SHOP_ADDRESS),
+                (s["reference"], ", ".join(appointments)),
+            ]
+            _safe_send(
+                recipients=[email],
+                subject=s["subject"].format(shop=SHOP_NAME, date=date_label, time=start_label),
+                message=_email_html(s["heading"], s["intro"].format(name=customer_name),
+                                    rows, [s["pay"], s["change"]]),
+                reply_to=notify or None,
+            )
+
+        # Shop copy always in Lithuanian; barbers get their own only if opted in
+        # (their @blarberine.lt mailboxes may not exist yet).
+        shop_rcpts = [notify] if notify else []
+        if frappe.conf.get("blarberine_notify_barbers") and binfo.get("email"):
+            shop_rcpts.append(binfo["email"])
+        if shop_rcpts:
+            rows = [
+                ("Klientas", customer_name), ("Telefonas", phone), ("El. paštas", email),
+                ("Data", date_label), ("Laikas", time_label),
+                ("Meistras", binfo.get("barber_name") or barber),
+                ("Paslaugos", svc_html), ("Užsakymo nr.", ", ".join(appointments)),
+            ]
+            _safe_send(
+                recipients=shop_rcpts,
+                subject="Nauja rezervacija: %s – %s %s (%s)" % (
+                    customer_name, date_label, start_label, binfo.get("barber_name") or barber),
+                message=_email_html("Nauja rezervacija",
+                                    "Per svetainę gauta nauja rezervacija.", rows, []),
+            )
+    except Exception:
+        frappe.clear_last_message()
+        frappe.log_error(frappe.get_traceback(), "Blarberine booking email failed")
+
+
+def send_reminders():
+    """Daily scheduler job: remind tomorrow's customers about their visit.
+    Appointments of one customer are grouped into a single email."""
+    tomorrow = frappe.utils.add_days(frappe.utils.nowdate(), 1)
+    appts = frappe.get_all(
+        "Appointment",
+        filters={"appointment_date": tomorrow, "status": "Scheduled"},
+        fields=["name", "customer", "barber", "service", "start_time"],
+        order_by="customer, start_time",
+    )
+    by_cust = {}
+    for a in appts:
+        by_cust.setdefault(a.customer, []).append(a)
+    date_label = frappe.utils.formatdate(tomorrow, "dd.MM.yyyy")
+    for cust, rows in by_cust.items():
+        cinfo = frappe.db.get_value("Customer", cust, ["customer_name", "email"], as_dict=True)
+        if not (cinfo and cinfo.email):
+            continue
+        start = _fmt(min(_to_minutes(r.start_time) for r in rows if _to_minutes(r.start_time) is not None))
+        barber_name = frappe.db.get_value("Barber", rows[0].barber, "barber_name") or rows[0].barber
+        svc_bits = []
+        for r in rows:
+            srow = frappe.db.get_value("Service", r.service, ["service_name", "duration", "price"], as_dict=True)
+            if srow:
+                svc_bits.append("%s (%d min) – %s" % (
+                    srow.service_name, int(srow.duration or 0), _eur(srow.price)))
+        _safe_send(
+            recipients=[cinfo.email],
+            subject="Priminimas: rytoj %s – %s" % (start, SHOP_NAME),
+            message=_email_html(
+                "Primename apie jūsų vizitą",
+                "Sveiki, %s! Laukiame jūsų rytoj. / A reminder that your visit is tomorrow."
+                % cinfo.customer_name,
+                [("Data", date_label), ("Laikas", start), ("Meistras", barber_name),
+                 ("Paslaugos", "<br>".join(svc_bits)), ("Adresas", SHOP_ADDRESS)],
+                ["Atsiskaitymas vietoje – grynaisiais arba kortele.",
+                 "Negalite atvykti? Atsakykite į šį laišką. / Can't make it? Just reply to this email."],
+            ),
+            reply_to=frappe.conf.get("blarberine_notify_email") or None,
+        )
