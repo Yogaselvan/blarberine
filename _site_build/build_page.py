@@ -235,8 +235,10 @@ def section(children,*,bg=BG,pad="56px",width="1040px",attributes=None,name=None
 def u(path): return path
 
 def _menu_link(label,href,key=None):
-    return link(label,href,{"fontSize":"14px","color":INK,"fontWeight":"500","padding":"9px 10px",
+    b=link(label,href,{"fontSize":"14px","color":INK,"fontWeight":"500","padding":"9px 10px",
         "borderRadius":"8px","width":"100%"},classes=["bl-menu-link"])
+    if key: b["dataKey"]={"key":key,"type":"key","property":"innerHTML"}
+    return b
 
 def _menu_panel(children,width="260px"):
     return blk("div",classes=["bl-menu"],children=children,styles={
@@ -671,7 +673,7 @@ for st in [5,4,3,2,1]:
     cc=0
     for x in revs:
         if int(x.get("rating") or 0)==st:
-            cc+=1
+            cc=cc+1
     brk.append({"label":"%%d"%%st,"stars":"★"*st,"count":"%%d"%%cc,"pct":("%%d%%%%"%%int(100*cc/n)) if n else "0%%"})
 data.review_breakdown=brk
 ''' % (lang, tr_src, mins, ("nuo" if lang=="lt" else "from"),
