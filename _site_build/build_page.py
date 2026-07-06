@@ -355,12 +355,11 @@ def lang_dropdown(active):
         styles={"position":"relative","display":"flex","flexDirection":"row","alignItems":"center"})
 
 def nav(active="home"):
-    brand=blk("a",attributes={"href":R_HOME},children=[
-        text("Blarberinė",{"fontFamily":HEAD,"fontSize":"22px","color":GOLD,"fontWeight":"600",
-            "letterSpacing":"0.12em","lineHeight":"1","whiteSpace":"nowrap"},mob={"fontSize":"18px"}),
-        text("KAUNAS",{"fontFamily":FONT,"fontSize":"8px","color":MUTED,"fontWeight":"600",
-            "letterSpacing":"0.42em","marginTop":"3px"})],
-        styles={"textDecoration":"none","display":"flex","flexDirection":"column",
+    _navlogo=img("/assets/blarberine/images/logo.png",{"height":"42px","width":"auto","display":"block"})
+    _navlogo["attributes"]["alt"]="Blarberinė Kaunas"
+    _navlogo["mobileStyles"]={"height":"30px"}
+    brand=blk("a",attributes={"href":R_HOME},children=[_navlogo],
+        styles={"textDecoration":"none","display":"flex","alignItems":"center",
             "flexShrink":"1","minWidth":"0","overflow":"hidden"})
 
     def navitem(label,href,panel):
@@ -437,9 +436,10 @@ def footer():
         for label,href in items:
             ch.append(link(label,href,{"fontSize":"14px","color":"#b3ab98","marginBottom":"10px"}))
         return blk("div",children=ch,styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"180px"})
+    _footlogo=img("/assets/blarberine/images/logo.png",{"height":"50px","width":"auto","display":"block","marginBottom":"18px"})
+    _footlogo["attributes"]["alt"]="Blarberinė Kaunas"
     brand_col=blk("div",children=[
-        text("Blarberinė",{"fontFamily":HEAD,"fontSize":"25px","color":GOLD,"fontWeight":"600","letterSpacing":"0.1em","marginBottom":"2px"}),
-        text("KAUNAS",{"fontFamily":FONT,"fontSize":"9px","color":MUTED,"fontWeight":"600","letterSpacing":"0.42em","marginBottom":"14px"}),
+        _footlogo,
         text(t("footer_tag"),{"fontSize":"14px","color":"#b3ab98","lineHeight":"1.6","marginBottom":"16px","width":"auto","maxWidth":"260px"}),
         blk("div",children=[text(g,{"fontSize":"16px","color":GOLD}) for g in ["f","ig","in"]],
             styles={"display":"flex","flexDirection":"row","gap":"14px"})],
