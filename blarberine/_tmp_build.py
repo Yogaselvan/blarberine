@@ -489,6 +489,70 @@ def translate_existing():
         traceback.print_exc()
 
 
+def apply_clean_urls():
+    """Set / as the LT home, redirect the old /blarberine URLs, and delete the old-route pages."""
+    import traceback
+    try:
+        # Builder resolves the site root from Builder Settings.home_page (NOT Website Settings)
+        frappe.db.set_value("Builder Settings", "Builder Settings", "home_page", "home")
+        ws = frappe.get_doc("Website Settings")
+        ws.home_page = "home"
+        pairs = [("/blarberine", "/"), ("/blarberine/services", "/services"), ("/blarberine/team", "/team"),
+                 ("/home", "/"), ("/en/blarberine", "/en"), ("/en/blarberine/services", "/en/services"),
+                 ("/en/blarberine/team", "/en/team")]
+        have = {(r.source, r.target) for r in (ws.route_redirects or [])}
+        for s, t in pairs:
+            if (s, t) not in have:
+                ws.append("route_redirects", {"source": s, "target": t})
+        ws.save(ignore_permissions=True)
+        print("home_page=home; redirects ensured")
+        for route in ("blarberine", "blarberine/services", "blarberine/team",
+                      "en/blarberine", "en/blarberine/services", "en/blarberine/team"):
+            name = frappe.db.get_value("Builder Page", {"route": route}, "name")
+            if name:
+                frappe.delete_doc("Builder Page", name, ignore_permissions=True, force=True)
+                print("deleted old page:", route)
+        frappe.db.commit()
+        frappe.clear_cache()
+        print("done")
+    except Exception:
+        traceback.print_exc()
+
+
+def delete_about():
+    """Remove the now-deleted About Builder Pages (LT + EN) so /…/about no longer resolves."""
+    import traceback
+    try:
+        for route in ("blarberine/about", "en/blarberine/about"):
+            name = frappe.db.get_value("Builder Page", {"route": route}, "name")
+            if name:
+                frappe.delete_doc("Builder Page", name, ignore_permissions=True, force=True)
+                print("deleted About page:", route)
+            else:
+                print("no page at:", route)
+        frappe.db.commit()
+        print("done")
+    except Exception:
+        traceback.print_exc()
+
+
+def cleanup_e2e():
+    """Delete ONLY the E2E collision-test records Claude created (appointment + test customer)."""
+    import traceback
+    try:
+        e2e_customers = frappe.get_all("Customer", filters={"customer_name": ["like", "E2E%"]}, fields=["name"])
+        for c in e2e_customers:
+            for a in frappe.get_all("Appointment", filters={"customer": c.name}, fields=["name"]):
+                frappe.delete_doc("Appointment", a.name, ignore_permissions=True, force=True)
+                print("deleted appointment:", a.name)
+            frappe.delete_doc("Customer", c.name, ignore_permissions=True, force=True)
+            print("deleted customer:", c.name)
+        frappe.db.commit()
+        print("done")
+    except Exception:
+        traceback.print_exc()
+
+
 def delete_rosyai():
     """Delete the 'Rosy-ai' test posts (child first to avoid the link constraint) + their pages."""
     import traceback

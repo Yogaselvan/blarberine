@@ -8,7 +8,7 @@
   var API="/api/method/blarberine.blarberine.api.";
   var FONT="'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
   var LANG=/^\/en(\/|$)/.test(location.pathname)?"en":"lt";
-  var BOOK=(LANG==="en"?"/en/blarberine":"/blarberine")+"?choose=1#booking";
+  var BOOK=(LANG==="en"?"/en":"/")+"?choose=1#booking";
   var I18N={
     en:{select:"Select",selected:"✓ Selected",add:"+ Add",added:"✓ Added",show:"Show details",all:"All",
         pay:"Pay at venue",edit:"▸ Edit",hide:"▾ Hide",remove:"× Remove",choose:"Choose time",

@@ -41,7 +41,7 @@ def _text(content, styles, tag="p", classes=None):
 
 
 def _home_route(lang):
-    return "blarberine" if (lang or "lt") == "lt" else "en/blarberine"
+    return "home" if (lang or "lt") == "lt" else "en"
 
 
 def _blog_route(lang):
@@ -86,7 +86,7 @@ def render_post(doc):
     _counter[0] = 0
     lang = doc.language or "lt"
     src_name = (frappe.db.get_value("Builder Page", {"route": _home_route(lang)}, "name")
-                or frappe.db.get_value("Builder Page", {"route": "blarberine"}, "name"))
+                or frappe.db.get_value("Builder Page", {"route": "home"}, "name"))
     if not src_name:
         frappe.throw("No home Builder Page found to inherit nav/footer from.")
     src = frappe.get_doc("Builder Page", src_name)

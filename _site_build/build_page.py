@@ -11,13 +11,13 @@ PAGES_DIR = os.path.join(SCRATCH, "pages")
 
 LANGS = ["lt", "en"]
 DEFAULT_LANG = "lt"
-KEYS = ["home", "services", "team", "about", "blog"]
+KEYS = ["home", "services", "team", "blog"]   # 'about' removed — merged into home contact section
 
 def _routes(lang):
-    p = "" if lang == DEFAULT_LANG else "en/"
-    return {"home": p+"blarberine", "services": p+"blarberine/services",
-            "team": p+"blarberine/team", "about": p+"blarberine/about",
-            "blog": p+"blog"}
+    # clean URLs: LT at root (home/services/team/blog), EN under /en
+    if lang == DEFAULT_LANG:
+        return {"home": "home", "services": "services", "team": "team", "blog": "blog"}
+    return {"home": "en", "services": "en/services", "team": "en/team", "blog": "en/blog"}
 ROUTES = {l: _routes(l) for l in LANGS}
 
 # palette (sampled from Treatwell)
@@ -137,6 +137,12 @@ T = {
                "lt":"Priežiūros patarimai, stiliaus gidai ir naujienos iš mūsų kėdžių."},
  "blog_read":{"en":"Read →","lt":"Skaityti →"},
  "blog_empty":{"en":"No posts yet — check back soon.","lt":"Kol kas įrašų nėra — užsukite netrukus."},
+ "contact_kicker":{"en":"Contact","lt":"Kontaktai"},
+ "contact_intro":{"en":"Drop by, call ahead, or get directions — we're in the heart of Kaunas Old Town.",
+                  "lt":"Užsukite, paskambinkite ar nuvykite pagal nuorodą — esame Kauno senamiesčio širdyje."},
+ "con_address":{"en":"Address","lt":"Adresas"},
+ "con_phone":{"en":"Phone","lt":"Telefonas"},
+ "con_hours":{"en":"Opening hours","lt":"Darbo laikas"},
  "findus_kicker":{"en":"Visit","lt":"Užsukite"},
  "findus_title":{"en":"Find us in Kaunas","lt":"Raskite mus Kaune"},
  "findus_sub":{"en":"Kurpių g. 7, Kaunas Old Town — a short walk from the Cathedral.",
@@ -242,8 +248,9 @@ def set_lang(lang):
     global LANG,R_HOME,R_SERVICES,R_TEAM,R_ABOUT,R_BLOG,BOOK_HREF
     LANG=lang
     r=ROUTES[lang]
-    R_HOME,R_SERVICES,R_TEAM,R_ABOUT="/"+r["home"],"/"+r["services"],"/"+r["team"],"/"+r["about"]
-    R_BLOG="/"+r["blog"]
+    R_HOME = "/" if lang==DEFAULT_LANG else "/en"          # LT home at root, EN at /en
+    R_SERVICES="/"+r["services"]; R_TEAM="/"+r["team"]; R_BLOG="/"+r["blog"]
+    R_ABOUT=R_HOME                                          # about removed; keep var harmless
     BOOK_HREF=R_HOME+"#booking"
 def t(k):
     v=T.get(k,{})
@@ -395,13 +402,12 @@ def nav(active="home"):
 
     _plain_link=lambda label,href:link(label,href,{"fontSize":"13px","color":INK,"fontWeight":"600",
         "letterSpacing":"0.06em","textTransform":"uppercase","padding":"8px 2px","display":"inline-flex","alignItems":"center"})
-    about_link=_plain_link(t("nav_about"),R_ABOUT)
     blog_link=_plain_link(t("nav_blog"),R_BLOG)
 
     center=blk("div",classes=["bl-navlinks"],children=[
         navitem(t("nav_services"),R_SERVICES,services_panel),
         navitem(t("nav_barbers"),R_TEAM,barbers_panel),
-        about_link, blog_link, lang_dropdown(active)],
+        blog_link, lang_dropdown(active)],
         styles={"display":"flex","flexDirection":"row","gap":"22px","alignItems":"center"},
         mobileStyles={"display":"none"})
 
@@ -416,7 +422,7 @@ def nav(active="home"):
     def mlink(label,href):
         return link(label,href,{"fontSize":"15px","color":INK,"fontWeight":"600","padding":"15px 4px","width":"100%","borderBottom":"1px solid "+BORDER,"display":"block"})
     mobile_menu=blk("div",classes=["bl-mobile-menu"],children=[
-        mlink(t("nav_services"),R_SERVICES),mlink(t("nav_barbers"),R_TEAM),mlink(t("nav_about"),R_ABOUT),mlink(t("nav_blog"),R_BLOG),
+        mlink(t("nav_services"),R_SERVICES),mlink(t("nav_barbers"),R_TEAM),mlink(t("nav_blog"),R_BLOG),
         blk("div",children=[lang_switcher(active)],styles={"display":"flex","paddingTop":"12px","paddingBottom":"6px"}),
         blk("div",children=[pill(t("book_now"),BOOK_HREF)],styles={"display":"flex","width":"100%","paddingTop":"6px","paddingBottom":"6px"})],
         styles={"display":"none","position":"absolute","top":"100%","left":"0","right":"0","width":"100%","flexDirection":"column",
@@ -430,6 +436,28 @@ def nav(active="home"):
         mobileStyles={"paddingLeft":"16px","paddingRight":"16px"})
 
 # ================================================================= FOOTER
+# ---- Social links (both CONFIRMED by Mantas 2026-07-06) ----
+IG_URL="https://www.instagram.com/blarberine"
+FB_URL="https://www.facebook.com/blarberine"
+
+def _social(url,svg,label):
+    return blk("a",attributes={"href":url,"target":"_blank","rel":"noopener","aria-label":label},
+        innerHTML=svg,classes=["bl-social"],
+        styles={"display":"inline-flex","alignItems":"center","justifyContent":"center","width":"38px","height":"38px",
+            "borderRadius":"50%","border":"1px solid "+BORDER,"color":GOLD,"textDecoration":"none","flexShrink":"0"})
+
+def social_row(gap="12px"):
+    fb=('<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+        '<path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8v-6.93H7.9V12H10V9.8'
+        'c0-2.07 1.23-3.22 3.12-3.22.9 0 1.85.16 1.85.16v2.03h-1.04c-1.03 0-1.35.64-1.35 1.29V12h2.3'
+        'l-.37 2.87h-1.93V21.8c4.56-.93 8-4.96 8-9.8z"/></svg>')
+    ig=('<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">'
+        '<rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5"/><circle cx="12" cy="12" r="3.8"/>'
+        '<circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>')
+    return blk("div",children=[_social(FB_URL,fb,"Facebook — Blarberinė | Kaunas"),
+                               _social(IG_URL,ig,"Instagram — @blarberine")],
+        styles={"display":"flex","flexDirection":"row","gap":gap})
+
 def footer():
     def col(title,items):
         ch=[text(title,{"fontSize":"12px","color":GOLD,"fontWeight":"600","letterSpacing":"0.14em","textTransform":"uppercase","marginBottom":"14px"})]
@@ -440,12 +468,11 @@ def footer():
     _footlogo["attributes"]["alt"]="Blarberinė Kaunas"
     brand_col=blk("div",children=[
         _footlogo,
-        text(t("footer_tag"),{"fontSize":"14px","color":"#b3ab98","lineHeight":"1.6","marginBottom":"16px","width":"auto","maxWidth":"260px"}),
-        blk("div",children=[text(g,{"fontSize":"16px","color":GOLD}) for g in ["f","ig","in"]],
-            styles={"display":"flex","flexDirection":"row","gap":"14px"})],
+        text(t("footer_tag"),{"fontSize":"14px","color":"#b3ab98","lineHeight":"1.6","marginBottom":"18px","width":"auto","maxWidth":"260px"}),
+        social_row()],
         styles={"display":"flex","flexDirection":"column","flex":"1.4","minWidth":"220px"})
     cols=blk("div",children=[brand_col,
-        col(t("foot_explore"),[(t("nav_services"),R_SERVICES),(t("nav_barbers"),R_TEAM),(t("nav_about"),R_ABOUT),(t("book_now"),BOOK_HREF)]),
+        col(t("foot_explore"),[(t("nav_services"),R_SERVICES),(t("nav_barbers"),R_TEAM),(t("nav_blog"),R_BLOG),(t("book_now"),BOOK_HREF)]),
         col(t("foot_visit"),[(t("foot_city"),"#"),(t("foot_country"),"#"),("+370 600 00000","#"),("hello@blarberine.lt","#")]),
         col(t("foot_hours"),[(t("foot_hours_wk"),"#"),(t("foot_hours_sat"),"#"),(t("foot_hours_sun"),"#"),(t("pay_at_venue"),"#")])],
         styles={"display":"flex","flexDirection":"row","gap":"40px","width":"100%","maxWidth":"1080px","flexWrap":"wrap"},
@@ -502,8 +529,7 @@ def hero():
         styles={"display":"flex","flexDirection":"row","alignItems":"center","gap":"10px","marginBottom":"18px"},
         mobileStyles={"flexWrap":"wrap","gap":"6px"})
     tag=text(t("hero_tag"),{"fontSize":"17px","color":BODY,"lineHeight":"1.6","maxWidth":"520px","marginBottom":"24px","width":"100%"})
-    cta=blk("div",children=[pill(t("book_appt"),BOOK_HREF,solid=True),
-        link(t("view_services"),R_SERVICES,{"fontSize":"15px","color":CORAL,"fontWeight":"600","padding":"12px 6px"})],
+    cta=blk("div",children=[pill(t("book_appt"),BOOK_HREF,solid=True)],
         styles={"display":"flex","flexDirection":"row","alignItems":"center","gap":"14px","flexWrap":"wrap"})
     left=blk("div",children=[name,rating,tag,cta],styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"280px"})
     big=img(GALLERY[0],{"width":"46%","height":"340px","objectFit":"cover","borderRadius":"16px","flexShrink":"0"})
@@ -544,7 +570,7 @@ def home():
     team=section([kicker(t("the_team")),h2(t("meet_barbers")),barbers_grid(),
         blk("div",children=[pill(t("meet_team_btn"),R_TEAM,solid=False)],styles={"display":"flex","justifyContent":"center","width":"100%","marginTop":"28px"})],
         bg=ALT)
-    return _body([nav("home"),hero(),info_bar(),stats_bar(),google_badge(),popular,team,before_after(),brands_strip(),faq_section(),booking_section(),bottom_map(),footer()])
+    return _body([nav("home"),hero(),info_bar(),stats_bar(),google_badge(),popular,team,before_after(),brands_strip(),faq_section(),booking_section(),contact_section(),footer()])
 
 def services_page():
     app=blk("div",attributes={"id":"services-app"},
@@ -793,17 +819,37 @@ def brands_strip():
         styles={"display":"flex","flexDirection":"column","alignItems":"center","textAlign":"center","width":"100%","marginBottom":"26px"})
     return section([head,row],bg=ALT)
 
-def bottom_map():
+def contact_section():
     q="Kurpi%C5%B3+g.+7+Kaunas"
+    directions_url="https://www.google.com/maps/dir/?api=1&destination="+q
+    # interactive google map
     iframe=blk("iframe",attributes={"src":"https://maps.google.com/maps?q="+q+"&z=16&output=embed",
         "loading":"lazy","title":"Blarberinė — Kurpių g. 7, Kaunas","allowfullscreen":""},
         styles={"width":"100%","height":"100%","border":"0","display":"block"})
-    box=blk("div",children=[iframe],styles={"width":"100%","height":"400px","overflow":"hidden",
-        "borderRadius":"16px","border":"1px solid "+BORDER},mobileStyles={"height":"300px"})
-    head=blk("div",children=[kicker(t("findus_kicker")),h2(t("findus_title")),
-        text(t("findus_sub"),{"fontSize":"15px","color":MUTED,"lineHeight":"1.6","width":"auto","marginBottom":"26px","textAlign":"center"})],
-        styles={"display":"flex","flexDirection":"column","alignItems":"center","textAlign":"center","width":"100%"})
-    return section([head,box],bg=BG,width="1180px")
+    box=blk("div",children=[iframe],styles={"width":"100%","height":"380px","overflow":"hidden",
+        "borderRadius":"16px","border":"1px solid "+BORDER,"flex":"1.25","minWidth":"300px"},mobileStyles={"height":"300px"})
+    # contact details column
+    def line(label,value):
+        return blk("div",children=[
+            text(label,{"fontSize":"12px","color":MUTED,"fontWeight":"700","letterSpacing":"0.1em","textTransform":"uppercase","marginBottom":"5px"}),
+            text(value,{"fontSize":"16px","color":BODY,"width":"auto","lineHeight":"1.5"})],
+            styles={"display":"flex","flexDirection":"column","marginBottom":"22px"})
+    hours_val=t("foot_hours_wk")+" · "+t("foot_hours_sat")+" · "+t("foot_hours_sun")
+    directions=link(t("get_directions"),directions_url,{"fontSize":"15px","color":GOLD,"fontWeight":"700","marginTop":"2px","width":"fit-content"})
+    directions["attributes"]["target"]="_blank"
+    details=blk("div",children=[
+        text("Blarberinė",{"fontFamily":HEAD,"fontSize":"22px","color":GOLD,"fontWeight":"600","letterSpacing":"0.04em","marginBottom":"20px"}),
+        line(t("con_address"),t("address_line")),
+        line(t("con_phone"),"+370 600 00000"),
+        line(t("con_hours"),hours_val),
+        directions],
+        styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"260px","justifyContent":"center"})
+    row=blk("div",children=[details,box],styles={"display":"flex","flexDirection":"row","gap":"44px","width":"100%","alignItems":"stretch"},
+        mobileStyles={"flexDirection":"column","gap":"26px"})
+    head=blk("div",children=[kicker(t("contact_kicker")),h2(t("findus_title")),
+        text(t("contact_intro"),{"fontSize":"15px","color":MUTED,"lineHeight":"1.6","width":"auto","marginBottom":"30px"})],
+        styles={"display":"flex","flexDirection":"column","width":"100%"})
+    return section([head,row],bg=ALT,width="1120px",attributes={"id":"contact"},name="contact")
 
 def booking_cta():
     card=blk("div",children=[kicker(t("reserve_chair")),h2(t("ready_fresh")),
@@ -846,6 +892,8 @@ a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none !import
 .bl-faq-qt{transition:color .15s ease;}
 .bl-faq:hover .bl-faq-qt{color:#d4af37;}
 .bl-barberpole{background:repeating-linear-gradient(-45deg,#c8102e 0 10px,#f5f5f5 10px 20px,#0a3161 20px 30px,#f5f5f5 30px 40px);}
+.bl-social{transition:background .15s ease,color .15s ease,border-color .15s ease;}
+.bl-social:hover{background:#d4af37;color:#0d0d0d;border-color:#d4af37;}
 #booking-app select option{background:#1a1a1a;color:#f2ede4;}
 .bl-blogcard{transition:transform .15s ease,border-color .15s ease;}
 .bl-blogcard:hover{transform:translateY(-3px);border-color:#d4af37;}
@@ -952,7 +1000,7 @@ data.review_breakdown=brk
 ''' % (lang, tr_src, mins, ("nuo" if lang=="lt" else "from"),
        ("atsiliepimai" if lang=="lt" else "reviews"), blog_src)
 
-PAGES={"home":home,"services":services_page,"team":team_page,"about":about_page,"blog":blog_list}
+PAGES={"home":home,"services":services_page,"team":team_page,"blog":blog_list}
 
 # ---- SEO: preview image (1200x630) + favicon shipped in the app so they deploy with the code ----
 OG_IMAGE="/assets/blarberine/images/blarberine-og.jpg"
