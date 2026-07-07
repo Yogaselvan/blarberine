@@ -10,3 +10,4 @@ blarberine.patches.set_notify_email_v1
 blarberine.patches.rebuild_pages_v2
 blarberine.patches.rebuild_pages_v3
 blarberine.patches.rebuild_pages_v4
+blarberine.patches.rebuild_pages_v5

@@ -3,8 +3,8 @@
    Shares a basket in localStorage that Phase 3 booking will consume. */
 (function () {
   "use strict";
-  var CORAL="#d4af37", NAVY="#050505", INK="#f2ede4", MUTED="#948c7a",
-      BORDER="#2b2820", ALT="#141414", GREEN="#3fbf7a", CARD="#1a1a1a", DARK="#0d0d0d";
+  var CORAL="#c4803a", NAVY="#140f0a", INK="#f3ede3", MUTED="#9a8e7c",
+      BORDER="#3a2f22", ALT="#221a12", GREEN="#3fbf7a", CARD="#241c14", DARK="#1a140e";
   var API="/api/method/blarberine.blarberine.api.";
   var FONT="'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
   var LANG=/^\/en(\/|$)/.test(location.pathname)?"en":"lt";
@@ -90,7 +90,7 @@
     line1.appendChild(el("span","font-family:"+FONT+";font-size:12px;color:"+CORAL+";font-weight:600;",{text:barOpen?L.hide:L.edit}));
     info.appendChild(line1);
     info.appendChild(el("div","font-family:"+FONT+";font-size:12px;color:"+MUTED+";",{text:L.pay}));
-    var go=el("a","font-family:"+FONT+";background:"+CORAL+";color:#0d0d0d;font-weight:700;font-size:15px;"+
+    var go=el("a","font-family:"+FONT+";background:"+CORAL+";color:#1a140e;font-weight:700;font-size:15px;"+
       "padding:12px 28px;border-radius:8px;text-decoration:none;cursor:pointer;flex-shrink:0;",{text:L.choose,href:BOOK});
     rowWrap.appendChild(info); rowWrap.appendChild(go);
     bar.appendChild(rowWrap);
@@ -140,7 +140,7 @@
         var on=(label===active);
         var chip=el("button","font-family:"+FONT+";font-size:14px;font-weight:600;padding:9px 18px;border-radius:999px;"+
           "cursor:pointer;transition:all .12s ease;"+
-          (on?("background:"+CORAL+";color:#0d0d0d;border:1px solid "+CORAL+";")
+          (on?("background:"+CORAL+";color:#1a140e;border:1px solid "+CORAL+";")
              :("background:"+CARD+";color:"+INK+";border:1px solid "+BORDER+";")),
           {text:label,on:{click:function(){ active=label; drawChips(); drawList(); }}});
         chipRow.appendChild(chip);
@@ -247,7 +247,7 @@
     box.appendChild(el("div","font-family:"+FONT+";font-size:15px;font-weight:700;color:"+INK+";margin-bottom:8px;",{text:L.ckTitle}));
     box.appendChild(el("div","font-family:"+FONT+";font-size:13px;color:"+MUTED+";line-height:1.55;margin-bottom:16px;",{text:L.ckText}));
     var btns=el("div","display:flex;gap:10px;flex-wrap:wrap;");
-    btns.appendChild(el("button","font-family:"+FONT+";flex:1;min-width:130px;background:"+CORAL+";color:#0d0d0d;font-weight:700;font-size:14px;padding:11px 16px;border:none;border-radius:8px;cursor:pointer;",
+    btns.appendChild(el("button","font-family:"+FONT+";flex:1;min-width:130px;background:"+CORAL+";color:#1a140e;font-weight:700;font-size:14px;padding:11px 16px;border:none;border-radius:8px;cursor:pointer;",
       {text:L.ckAll,on:{click:function(){ ckSet("all"); box.remove(); loadAnalytics(); }}}));
     btns.appendChild(el("button","font-family:"+FONT+";flex:1;min-width:130px;background:"+CARD+";color:"+INK+";font-weight:600;font-size:14px;padding:11px 16px;border:1px solid "+BORDER+";border-radius:8px;cursor:pointer;",
       {text:L.ckEss,on:{click:function(){ ckSet("essential"); box.remove(); }}}));

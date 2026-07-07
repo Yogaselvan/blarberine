@@ -5,8 +5,8 @@
    get_week_availability, create_basket_booking. Pay-at-venue only. */
 (function () {
   "use strict";
-  var CORAL="#d4af37", NAVY="#050505", INK="#f2ede4", MUTED="#948c7a",
-      BORDER="#2b2820", ALT="#141414", GREEN="#3fbf7a", CARD="#1a1a1a", DARK="#0d0d0d";
+  var CORAL="#c4803a", NAVY="#140f0a", INK="#f3ede3", MUTED="#9a8e7c",
+      BORDER="#3a2f22", ALT="#221a12", GREEN="#3fbf7a", CARD="#241c14", DARK="#1a140e";
   var API="/api/method/blarberine.blarberine.api.";
   var FONT="'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
   var LANG=/^\/en(\/|$)/.test(location.pathname)?"en":"lt";
@@ -78,7 +78,7 @@
   function addDays(d,n){ var x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
 
   var BTN="font-family:"+FONT+";display:inline-flex;align-items:center;justify-content:center;background:"+CORAL+
-    ";color:#0d0d0d;font-weight:700;font-size:15px;padding:13px 26px;border:none;border-radius:8px;cursor:pointer;text-decoration:none;";
+    ";color:#1a140e;font-weight:700;font-size:15px;padding:13px 26px;border:none;border-radius:8px;cursor:pointer;text-decoration:none;";
   var GHOST="font-family:"+FONT+";background:"+CARD+";color:"+MUTED+";font-weight:600;font-size:14px;padding:9px 18px;border:1px solid "+BORDER+";border-radius:8px;cursor:pointer;";
 
   ready(function(){
@@ -109,7 +109,7 @@
         [L.all].concat(DATA.cats.map(function(c){return c.category_name;})).forEach(function(l){
           var on=l===active;
           chips.appendChild(el("button","font-family:"+FONT+";font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;cursor:pointer;"+
-            (on?("background:"+CORAL+";color:#0d0d0d;border:1px solid "+CORAL+";"):("background:"+CARD+";color:"+INK+";border:1px solid "+BORDER+";")),
+            (on?("background:"+CORAL+";color:#1a140e;border:1px solid "+CORAL+";"):("background:"+CARD+";color:"+INK+";border:1px solid "+BORDER+";")),
             {text:l,on:{click:function(){active=l;drawChips();drawList();}}}));
         });
       }
@@ -210,7 +210,7 @@
             var di=iso(new Date(monthCursor.getFullYear(),monthCursor.getMonth(),dnum));
             var count=(monthData&&monthData[di])||0, past=di<todayI, avail=count>0&&!past, on=state.date===di, isToday=di===todayI;
             var st="display:flex;align-items:center;justify-content:center;height:40px;border-radius:10px;font-family:"+FONT+";font-size:14px;font-weight:600;"+
-              (on?("background:"+CORAL+";color:#0d0d0d;"):(avail?("color:"+INK+";background:"+CARD+";cursor:pointer;"):("color:#4a473f;")))+
+              (on?("background:"+CORAL+";color:#1a140e;"):(avail?("color:"+INK+";background:"+CARD+";cursor:pointer;"):("color:#4a473f;")))+
               (isToday&&!on?("box-shadow:inset 0 0 0 1px "+CORAL+";"):"");
             var cell=el("div",st,{text:(""+dnum)});
             if(avail&&!on) cell.addEventListener("click",function(){ state.date=di; state.slot=null; drawCalendar(); drawSlots(); });

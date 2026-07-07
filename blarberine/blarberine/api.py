@@ -523,7 +523,7 @@ def _email_html(heading, intro, rows, notes):
         '<div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:12px;'
         'border:1px solid #e6dfd0;overflow:hidden">'
         '<div style="background:#0d0d0d;padding:20px 28px">'
-        '<span style="color:#d4af37;font-size:20px;letter-spacing:0.08em">' + SHOP_NAME + "</span></div>"
+        '<span style="color:#c4803a;font-size:20px;letter-spacing:0.08em">' + SHOP_NAME + "</span></div>"
         '<div style="padding:24px 28px 28px">'
         '<h2 style="margin:0 0 6px;color:#1c1a15;font-size:22px;font-weight:600">' + heading + "</h2>"
         '<p style="margin:0 0 18px;color:#6b6455;font-size:14px;line-height:1.5">' + intro + "</p>"

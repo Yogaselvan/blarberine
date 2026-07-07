@@ -20,13 +20,17 @@ def _routes(lang):
     return {"home": "en", "services": "en/services", "team": "en/team", "blog": "en/blog"}
 ROUTES = {l: _routes(l) for l in LANGS}
 
-# palette (sampled from Treatwell)
-# Dark luxury brand palette (manager's brand board): black + gold + cream.
-BG="#0d0d0d"; ALT="#141414"; INK="#f2ede4"; BODY="#c9c3b8"; MUTED="#948c7a"
-BORDER="#2b2820"; CORAL="#d4af37"; NAVY="#050505"; GOLD="#d4af37"; CARD="#1a1a1a"
-BAR_Y,BAR_B,BAR_T="#d4af37","#8a6f22","#e7d29a"
+# Espresso + cream + copper — 2026-07-07 redesign cloned from the approved
+# reference layout (dark hero with booking card + giant condensed headline,
+# cream content sections). Dark tokens keep their old names so every existing
+# section reskins automatically; L* tokens are for the new cream sections.
+BG="#1a140e"; ALT="#221a12"; INK="#f3ede3"; BODY="#cfc5b6"; MUTED="#9a8e7c"
+BORDER="#3a2f22"; CORAL="#c4803a"; NAVY="#140f0a"; GOLD="#c4803a"; CARD="#241c14"
+BAR_Y,BAR_B,BAR_T="#c4803a","#7d5124","#e2b988"
+LBG="#f3ede3"; LCARD="#faf7f2"; LINK="#221a12"; LMUT="#6e6455"; LLINE="#ddd3c2"
 FONT="'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-HEAD="'Playfair Display', Georgia, 'Times New Roman', serif"
+HEAD="'Oswald', 'Arial Narrow', 'Helvetica Neue', sans-serif"
+HERO_IMG="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=1800&q=80"
 
 GALLERY=[
  "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=900&q=80",
@@ -59,6 +63,15 @@ T = {
  "nav_blog":{"en":"Blog","lt":"Blogas"},
  "book_now":{"en":"Book now","lt":"Rezervuoti"},
  "book_appt":{"en":"Book an appointment","lt":"Rezervuoti vizitą"},
+ "hero_head":{"en":"Where tradition meets modern style","lt":"Kur tradicija susitinka su šiuolaikiniu stiliumi"},
+ "no_card":{"en":"no card needed","lt":"kortelės nereikia"},
+ "works_title":{"en":"Our work","lt":"Mūsų darbai"},
+ "works_sub":{"en":"The styles we craft every day.","lt":"Stilius, kurį kuriame kasdien."},
+ "prices_title":{"en":"Price list","lt":"Kainoraštis"},
+ "prices_sub":{"en":"Most popular services — the full list is in the booking window.",
+               "lt":"Populiariausios paslaugos — visą sąrašą rasite rezervacijos lange."},
+ "join_title":{"en":"Would you like to join our team?","lt":"Nori prisijungti prie mūsų komandos?"},
+ "join_btn":{"en":"Get in touch","lt":"Susisiekite"},
  "menu_services_head":{"en":"Services","lt":"Paslaugos"},
  "see_all_services":{"en":"See all services →","lt":"Visos paslaugos →"},
  "our_barbers":{"en":"Our barbers","lt":"Mūsų kirpėjai"},
@@ -295,7 +308,7 @@ def container(width="1040px",**extra):
     s={"display":"flex","flexDirection":"column","width":"100%","maxWidth":width,"flexShrink":0}; s.update(extra); return s
 
 def pill(label,href,*,solid=True,small=False):
-    if solid: bg,col,bd=GOLD,"#0d0d0d","none"
+    if solid: bg,col,bd=GOLD,"#1a140e","none"
     else: bg,col,bd="transparent",GOLD,"1px solid "+GOLD
     return link(label,href,{"display":"inline-flex","alignItems":"center","justifyContent":"center",
         "backgroundColor":bg,"color":col,"border":bd,"fontWeight":"600",
@@ -307,8 +320,8 @@ def pill(label,href,*,solid=True,small=False):
 def stars(size=16,color=GOLD):
     return text("★★★★★",{"fontSize":"%dpx"%size,"color":color,"letterSpacing":"2px","lineHeight":"1"})
 
-def kicker(l): return text(l,{"fontSize":"12px","letterSpacing":"0.2em","textTransform":"uppercase","color":CORAL,"fontWeight":"700","marginBottom":"10px"})
-def h2(l): return text(l,{"fontFamily":HEAD,"fontSize":"32px","color":INK,"fontWeight":"600","marginBottom":"20px","letterSpacing":"0.005em","lineHeight":"1.2"},tag="h2",mob={"fontSize":"24px","marginBottom":"16px","lineHeight":"1.25"})
+def kicker(l,color=CORAL): return text(l,{"fontSize":"12px","letterSpacing":"0.2em","textTransform":"uppercase","color":color,"fontWeight":"700","marginBottom":"10px"})
+def h2(l,color=INK): return text(l,{"fontFamily":HEAD,"fontSize":"42px","color":color,"fontWeight":"600","marginBottom":"20px","letterSpacing":"0.03em","lineHeight":"1.1","textTransform":"uppercase"},tag="h2",mob={"fontSize":"30px","marginBottom":"16px","lineHeight":"1.15"})
 
 def tri_bar(mt="0",mb="0"):
     seg=lambda c: blk("div",styles={"backgroundColor":c,"height":"4px","flex":"1"})
@@ -365,7 +378,7 @@ def lang_dropdown(active):
         styles={"position":"relative","display":"flex","flexDirection":"row","alignItems":"center"})
 
 def nav(active="home"):
-    _navlogo=img("/assets/blarberine/images/logo.png",{"height":"42px","width":"auto","display":"block"})
+    _navlogo=img("/assets/blarberine/images/logo-cream.png",{"height":"42px","width":"auto","display":"block"})
     _navlogo["attributes"]["alt"]="Blarberinė Kaunas"
     _navlogo["mobileStyles"]={"height":"30px"}
     brand=blk("a",attributes={"href":R_HOME},children=[_navlogo],
@@ -472,7 +485,7 @@ def footer():
         return blk("div",children=ch,styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"180px"})
     # small, and alignSelf/flexShrink/objectFit stop the flex column from stretching
     # the emblem into an "egg" (the manager's note)
-    _footlogo=img("/assets/blarberine/images/logo.png",{"height":"38px","width":"auto","display":"block",
+    _footlogo=img("/assets/blarberine/images/logo-cream.png",{"height":"38px","width":"auto","display":"block",
         "marginBottom":"18px","alignSelf":"flex-start","flexShrink":"0","objectFit":"contain","maxWidth":"100%"})
     _footlogo["attributes"]["alt"]="Blarberinė Kaunas"
     brand_col=blk("div",children=[
@@ -520,34 +533,102 @@ def rows_shrinkwrap(rep):
     return blk("div",children=[colw],styles={"display":"flex","flexDirection":"row","width":"100%","minWidth":"0"})
 
 def barber_card():
-    photo=img(WORK[0],{"width":"100%","height":"260px","objectFit":"cover","borderRadius":"12px","flexShrink":"0"},key="photo")
-    name=text("Barber",{"fontSize":"18px","color":INK,"fontWeight":"700","marginTop":"14px"},key="barber_name",tag="h3")
-    bio=text("Bio",{"fontSize":"14px","color":MUTED,"lineHeight":"1.55","marginTop":"6px","width":"auto"},key="bio")
-    return blk("div",children=[photo,name,bio],styles={"display":"flex","flexDirection":"column","width":"100%"})
+    # light "experts" card (reference style): photo card on paper background
+    photo=img(WORK[0],{"width":"100%","height":"280px","objectFit":"cover","borderRadius":"12px","flexShrink":"0"},key="photo")
+    name=text("Barber",{"fontFamily":HEAD,"fontSize":"22px","color":LINK,"fontWeight":"600","marginTop":"16px",
+        "textTransform":"uppercase","letterSpacing":"0.03em"},key="barber_name",tag="h3")
+    bio=text("Bio",{"fontSize":"14px","color":LMUT,"lineHeight":"1.55","marginTop":"6px","width":"auto"},key="bio")
+    return blk("div",children=[photo,name,bio],styles={"display":"flex","flexDirection":"column","width":"100%",
+        "backgroundColor":LCARD,"border":"1px solid "+LLINE,"borderRadius":"16px",
+        "paddingTop":"14px","paddingBottom":"22px","paddingLeft":"14px","paddingRight":"14px"})
 
 def barbers_grid():
     return blk("div",children=[barber_card()],isRepeater=True,dataKey={"key":"barbers","comesFrom":"dataScript"},
         styles={"display":"grid","gridTemplateColumns":"repeat(3, 1fr)","gap":"28px","width":"100%"},
         mobileStyles={"gridTemplateColumns":"1fr"})
 
+# ============================================== redesign: cream sections
+def works_gallery():
+    head=blk("div",children=[
+        blk("div",children=[kicker(t("works_title")),h2(t("works_title"),color=LINK),
+            text(t("works_sub"),{"fontSize":"15px","color":LMUT,"lineHeight":"1.6","width":"auto"})],
+            styles={"display":"flex","flexDirection":"column"})],
+        styles={"display":"flex","flexDirection":"row","justifyContent":"space-between","alignItems":"flex-end",
+                "width":"100%","marginBottom":"28px"})
+    cells=[]
+    for src in [GALLERY[0],WORK[1],GALLERY[1],WORK[4],WORK[3],GALLERY[2]]:
+        cells.append(img(src,{"width":"100%","height":"250px","objectFit":"cover","borderRadius":"14px","display":"block"}))
+    grid=blk("div",children=cells,styles={"display":"grid","gridTemplateColumns":"repeat(3, 1fr)","gap":"22px","width":"100%"},
+        mobileStyles={"gridTemplateColumns":"1fr","gap":"14px"})
+    return section([head,grid],bg=LBG)
+
+def prices_strip():
+    left=blk("div",children=[kicker(t("prices_title")),h2(t("prices_title"),color=LINK),
+        text(t("prices_sub"),{"fontSize":"14px","color":LMUT,"lineHeight":"1.6","maxWidth":"280px","width":"auto","marginBottom":"18px"}),
+        pill(t("book_now"),BOOK_HREF,solid=True)],
+        styles={"display":"flex","flexDirection":"column","width":"320px","flexShrink":"0"},
+        mobileStyles={"width":"100%"})
+    nm=text("Service",{"fontSize":"16px","color":LINK,"fontWeight":"600"},key="service_name")
+    dur=text("30 min",{"fontSize":"12px","color":LMUT,"marginTop":"2px"},key="duration_display")
+    lcol=blk("div",children=[nm,dur],styles={"display":"flex","flexDirection":"column","minWidth":"0"})
+    pr=text("€25",{"fontFamily":HEAD,"fontSize":"26px","color":CORAL,"fontWeight":"600","flexShrink":"0"},key="price_display")
+    prow=blk("div",children=[lcol,pr],styles={"display":"flex","flexDirection":"row","justifyContent":"space-between",
+        "alignItems":"center","gap":"16px","width":"100%","paddingTop":"14px","paddingBottom":"14px","borderBottom":"1px solid "+LLINE})
+    rep=blk("div",children=[prow],isRepeater=True,dataKey={"key":"popular_services","comesFrom":"dataScript"},
+        styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"280px"})
+    row=blk("div",children=[left,rep],styles={"display":"flex","flexDirection":"row","gap":"56px","width":"100%","alignItems":"flex-start"},
+        mobileStyles={"flexDirection":"column","gap":"28px"})
+    return section([row],bg=LBG,pad="48px")
+
+def join_strip():
+    title=text(t("join_title"),{"fontFamily":HEAD,"fontSize":"26px","color":LINK,"fontWeight":"600",
+        "textTransform":"uppercase","letterSpacing":"0.03em"})
+    btn=pill(t("join_btn"),"#contact",solid=False,small=True)
+    row=blk("div",children=[title,btn],styles={"display":"flex","flexDirection":"row","justifyContent":"space-between",
+        "alignItems":"center","gap":"20px","width":"100%","backgroundColor":LCARD,"border":"1px solid "+LLINE,
+        "borderRadius":"16px","paddingTop":"26px","paddingBottom":"26px","paddingLeft":"32px","paddingRight":"32px","flexWrap":"wrap"})
+    return blk("div",children=[row],styles={"display":"flex","width":"100%","marginTop":"28px"})
+
 # ================================================================= HERO
 def hero():
-    name=text("Blarberinė",{"fontFamily":HEAD,"fontSize":"50px","color":INK,"fontWeight":"600","letterSpacing":"0.12em","lineHeight":"1.05","textTransform":"uppercase","marginBottom":"14px"},tag="h1",mob={"fontSize":"33px","letterSpacing":"0.08em"})
-    rating=blk("div",children=[stars(18),text(t("trusted"),{"fontSize":"14px","color":MUTED,"fontWeight":"500"}),
-        text(t("vilnius"),{"fontSize":"14px","color":MUTED})],
-        styles={"display":"flex","flexDirection":"row","alignItems":"center","gap":"10px","marginBottom":"18px"},
-        mobileStyles={"flexWrap":"wrap","gap":"6px"})
-    tag=text(t("hero_tag"),{"fontSize":"17px","color":BODY,"lineHeight":"1.6","maxWidth":"520px","marginBottom":"24px","width":"100%"})
-    cta=blk("div",children=[pill(t("book_appt"),BOOK_HREF,solid=True)],
-        styles={"display":"flex","flexDirection":"row","alignItems":"center","gap":"14px","flexWrap":"wrap"})
-    left=blk("div",children=[name,rating,tag,cta],styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"280px"})
-    big=img(GALLERY[0],{"width":"46%","height":"340px","objectFit":"cover","borderRadius":"16px","flexShrink":"0"})
-    big["mobileStyles"]={"width":"100%","height":"240px"}
-    row=blk("div",children=[left,big],styles={"display":"flex","flexDirection":"row","gap":"40px","width":"100%","maxWidth":"1080px","alignItems":"center"},
-        mobileStyles={"flexDirection":"column","gap":"24px"})
+    # ---- left: booking quick-card (live top services + CTA to the real widget)
+    card_title=text(t("book_appt"),{"fontFamily":HEAD,"fontSize":"30px","color":INK,"fontWeight":"600",
+        "textTransform":"uppercase","letterSpacing":"0.03em","marginBottom":"4px"},tag="h2")
+    card_sub=text(t("pay_at_venue")+" — "+t("no_card"),{"fontSize":"13px","color":MUTED,"marginBottom":"16px","width":"auto","lineHeight":"1.5"})
+    svc_name=text("Service",{"fontSize":"14px","color":INK,"fontWeight":"600"},key="service_name")
+    svc_meta=text("30 min",{"fontSize":"12px","color":MUTED,"marginTop":"2px"},key="duration_display")
+    svc_left=blk("div",children=[svc_name,svc_meta],styles={"display":"flex","flexDirection":"column","minWidth":"0"})
+    svc_price=text("€25",{"fontFamily":HEAD,"fontSize":"20px","color":CORAL,"fontWeight":"600","flexShrink":"0"},key="price_display")
+    svc_row=blk("div",children=[svc_left,svc_price],styles={"display":"flex","flexDirection":"row","justifyContent":"space-between",
+        "alignItems":"center","gap":"12px","width":"100%","paddingTop":"11px","paddingBottom":"11px","borderBottom":"1px solid "+BORDER})
+    svc_rep=blk("div",children=[svc_row],isRepeater=True,dataKey={"key":"hero_services","comesFrom":"dataScript"},
+        styles={"display":"flex","flexDirection":"column","width":"100%","marginBottom":"18px"})
+    card_btn=pill(t("book_now"),BOOK_HREF,solid=True)
+    card_btn["baseStyles"].update({"width":"100%","fontSize":"15px"})
+    card=blk("div",children=[card_title,card_sub,svc_rep,card_btn],
+        styles={"display":"flex","flexDirection":"column","width":"400px","flexShrink":"0",
+            "backgroundColor":"rgba(26,20,14,0.88)","border":"1px solid "+BORDER,"borderRadius":"16px",
+            "backdropFilter":"blur(6px)","paddingTop":"28px","paddingBottom":"28px","paddingLeft":"28px","paddingRight":"28px"},
+        mobileStyles={"width":"100%","paddingTop":"20px","paddingBottom":"20px","paddingLeft":"18px","paddingRight":"18px"})
+    # ---- right: trust line + giant condensed headline, bottom-right like the reference
+    rating=blk("div",children=[stars(15),text(t("trusted"),{"fontSize":"13px","color":BODY,"fontWeight":"600",
+        "letterSpacing":"0.1em","textTransform":"uppercase"})],
+        styles={"display":"flex","flexDirection":"row","alignItems":"center","gap":"10px","marginBottom":"14px","justifyContent":"flex-end"},
+        mobileStyles={"justifyContent":"flex-start"})
+    headline=text(t("hero_head"),{"fontFamily":HEAD,"fontSize":"64px","color":INK,"fontWeight":"600","lineHeight":"1.04",
+        "textTransform":"uppercase","letterSpacing":"0.02em","textAlign":"right","maxWidth":"620px","width":"auto"},
+        tag="h1",mob={"fontSize":"36px","textAlign":"left"})
+    right=blk("div",children=[rating,headline],styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"300px",
+        "alignItems":"flex-end","justifyContent":"flex-end","paddingBottom":"8px"},
+        mobileStyles={"alignItems":"flex-start"})
+    row=blk("div",children=[card,right],styles={"display":"flex","flexDirection":"row","gap":"40px","width":"100%","maxWidth":"1180px",
+        "alignItems":"stretch","minHeight":"560px"},
+        mobileStyles={"flexDirection":"column-reverse","gap":"28px","minHeight":"0"})
     return blk("section",children=[row],styles={"display":"flex","flexDirection":"column","alignItems":"center","width":"100%",
-        "flexShrink":0,"backgroundColor":BG,"paddingTop":"56px","paddingBottom":"40px","paddingLeft":"24px","paddingRight":"24px"},
-        mobileStyles={"paddingTop":"32px","paddingBottom":"28px","paddingLeft":"16px","paddingRight":"16px"})
+        "flexShrink":0,"paddingTop":"56px","paddingBottom":"48px","paddingLeft":"24px","paddingRight":"24px",
+        "backgroundImage":"linear-gradient(100deg, rgba(26,20,14,0.82) 0%, rgba(26,20,14,0.45) 55%, rgba(26,20,14,0.72) 100%), url('"+HERO_IMG+"')",
+        "backgroundSize":"cover","backgroundPosition":"center"},
+        mobileStyles={"paddingTop":"28px","paddingBottom":"28px","paddingLeft":"16px","paddingRight":"16px"})
 
 def info_bar():
     def item(icon,label):
@@ -570,14 +651,15 @@ def _body(children):
     return [b]
 
 def home():
-    team=section([kicker(t("the_team")),h2(t("meet_barbers")),barbers_grid(),
-        blk("div",children=[pill(t("meet_team_btn"),R_TEAM,solid=False)],styles={"display":"flex","justifyContent":"center","width":"100%","marginTop":"28px"})],
-        bg=ALT)
-    # Popular services section removed 2026-07-07 (redundant — the booking widget
-    # already lets you pick a service). The "Book an appointment" widget takes its
-    # place, high on the page; Services also removed from the nav for the same reason.
-    # (stats_bar + google_badge removed earlier: placeholder/unverified data.)
-    return _body([nav("home"),hero(),info_bar(),booking_section(),team,before_after(),brands_strip(),faq_section(),contact_section(),footer()])
+    # light "experts" section per the reference, with the join-the-team card
+    team=section([kicker(t("the_team")),h2(t("meet_barbers"),color=LINK),barbers_grid(),join_strip()],bg=LBG)
+    # Redesign composition (cloned from reference #1): dark hero w/ booking card
+    # -> info strip -> real booking widget (dark) -> cream works/prices/team ->
+    # dark brands strip -> cream FAQ -> dark contact + footer. before_after
+    # dropped (placeholder stock pairs; works_gallery covers it until Mantas
+    # sends real photos).
+    return _body([nav("home"),hero(),info_bar(),booking_section(),works_gallery(),prices_strip(),team,
+                  brands_strip(),faq_section(),contact_section(),footer()])
 
 def services_page():
     app=blk("div",attributes={"id":"services-app"},
@@ -765,7 +847,7 @@ def google_badge():
     letters=[text(ch,{"fontFamily":FONT,"fontSize":"21px","fontWeight":"700","color":c,"lineHeight":"1"}) for ch,c in goog]
     wordmark=blk("div",children=letters,styles={"display":"flex","flexDirection":"row","alignItems":"center"})
     st=text("★★★★★",{"fontSize":"18px","color":"#fbbc05","letterSpacing":"2px","lineHeight":"1"})
-    rating=text("5.0",{"fontFamily":FONT,"fontSize":"20px","fontWeight":"700","color":"#1a1a1a","lineHeight":"1"})
+    rating=text("5.0",{"fontFamily":FONT,"fontSize":"20px","fontWeight":"700","color":"#241c14","lineHeight":"1"})
     cnt=text(t("google_reviews_count"),{"fontSize":"13px","color":"#5f6368","fontWeight":"500"})
     inner=blk("div",children=[wordmark,st,rating,cnt],styles={"display":"flex","flexDirection":"row","alignItems":"center",
         "gap":"14px","flexWrap":"wrap","justifyContent":"center"})
@@ -797,23 +879,23 @@ def craft_philosophy():
 def faq_section():
     items=[]
     for i in range(1,8):
-        qt=text(t("faq%d_q"%i),{"fontSize":"16px","color":INK,"fontWeight":"600","lineHeight":"1.4",
+        qt=text(t("faq%d_q"%i),{"fontSize":"16px","color":LINK,"fontWeight":"600","lineHeight":"1.4",
             "flex":"1","minWidth":"0","width":"auto"},tag="span",classes=["bl-faq-qt"])
-        plus=text("+",{"fontSize":"24px","color":GOLD,"fontWeight":"300","lineHeight":"1",
+        plus=text("+",{"fontSize":"24px","color":CORAL,"fontWeight":"300","lineHeight":"1",
             "flexShrink":"0","marginLeft":"18px"},tag="span",classes=["bl-faq-plus"])
         summary=blk("summary",children=[qt,plus],classes=["bl-faq-q"],styles={"display":"flex","flexDirection":"row",
             "justifyContent":"space-between","alignItems":"center","width":"100%","cursor":"pointer",
             "paddingTop":"18px","paddingBottom":"18px","listStyle":"none"})
-        ans=text(t("faq%d_a"%i),{"fontSize":"15px","color":BODY,"lineHeight":"1.7","width":"auto",
+        ans=text(t("faq%d_a"%i),{"fontSize":"15px","color":LMUT,"lineHeight":"1.7","width":"auto",
             "paddingBottom":"20px","maxWidth":"680px"})
         det=blk("details",children=[summary,ans],classes=["bl-faq"],
-            styles={"borderBottom":"1px solid "+BORDER,"width":"100%"},
+            styles={"borderBottom":"1px solid "+LLINE,"width":"100%"},
             attributes=({"open":"open"} if i==1 else None))
         items.append(det)
-    head=blk("div",children=[kicker(t("faq_kicker")),h2(t("faq_title"))],
+    head=blk("div",children=[kicker(t("faq_kicker")),h2(t("faq_title"),color=LINK)],
         styles={"display":"flex","flexDirection":"column","alignItems":"center","textAlign":"center","width":"100%"})
     col=blk("div",children=items,styles={"display":"flex","flexDirection":"column","width":"100%","maxWidth":"760px","alignSelf":"center"})
-    return section([head,col],bg=BG)
+    return section([head,col],bg=LBG)
 
 def brands_strip():
     logos=[]
@@ -886,15 +968,15 @@ def booking_section():
 
 # ================================================================= NAV CSS
 NAV_CSS = """
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
-html,body{background:#0d0d0d;}
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+html,body{background:#1a140e;}
 body,input,button,textarea,select{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
-::selection{background:#d4af37;color:#0d0d0d;}
+::selection{background:#c4803a;color:#1a140e;}
 a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none !important; }
 .bl-menu{opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .18s ease,transform .18s ease,visibility .18s ease;pointer-events:none;}
 .bl-navitem:hover .bl-menu{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;}
 .bl-menu-link{transition:background .12s ease,color .12s ease;}
-.bl-menu-link:hover{background:#242017;color:#d4af37;}
+.bl-menu-link:hover{background:#2c2318;color:#c4803a;}
 .bl-promo:hover{opacity:.9;}
 .bl-brand{transition:opacity .15s ease;opacity:.7;}
 .bl-brand:hover{opacity:1;}
@@ -903,31 +985,31 @@ a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none !import
 .bl-faq-plus{transition:transform .2s ease;}
 .bl-faq[open] .bl-faq-plus{transform:rotate(45deg);}
 .bl-faq-qt{transition:color .15s ease;}
-.bl-faq:hover .bl-faq-qt{color:#d4af37;}
+.bl-faq:hover .bl-faq-qt{color:#c4803a;}
 .bl-barberpole{background:repeating-linear-gradient(-45deg,#c8102e 0 10px,#f5f5f5 10px 20px,#0a3161 20px 30px,#f5f5f5 30px 40px);}
 .bl-social{transition:background .15s ease,color .15s ease,border-color .15s ease;}
-.bl-social:hover{background:#d4af37;color:#0d0d0d;border-color:#d4af37;}
-#booking-app select option{background:#1a1a1a;color:#f2ede4;}
+.bl-social:hover{background:#c4803a;color:#1a140e;border-color:#c4803a;}
+#booking-app select option{background:#241c14;color:#f3ede3;}
 .bl-timegrid{display:flex;gap:28px;align-items:flex-start;width:100%;}
 .bl-timegrid .bl-cal{flex:0 0 330px;max-width:330px;}
 .bl-timegrid .bl-slots{flex:1 1 auto;min-width:0;}
 @media (max-width:760px){ .bl-timegrid{flex-direction:column;gap:22px;} .bl-timegrid .bl-cal,.bl-timegrid .bl-slots{flex:1 1 auto;max-width:100%;width:100%;} }
-#booking-app select:focus{outline:none;border-color:#d4af37;}
+#booking-app select:focus{outline:none;border-color:#c4803a;}
 .bl-blogcard{transition:transform .15s ease,border-color .15s ease;}
-.bl-blogcard:hover{transform:translateY(-3px);border-color:#d4af37;}
-.bl-blog-content{font-size:16px;line-height:1.8;color:#c9c3b8;}
+.bl-blogcard:hover{transform:translateY(-3px);border-color:#c4803a;}
+.bl-blog-content{font-size:16px;line-height:1.8;color:#cfc5b6;}
 .bl-blog-content p{margin:0 0 18px;}
-.bl-blog-content h2{font-family:'Playfair Display',Georgia,serif;color:#f2ede4;font-size:25px;font-weight:600;margin:32px 0 12px;letter-spacing:.005em;}
-.bl-blog-content h3{font-family:'Playfair Display',Georgia,serif;color:#f2ede4;font-size:20px;font-weight:600;margin:26px 0 10px;}
-.bl-blog-content a{color:#d4af37;text-decoration:underline !important;}
+.bl-blog-content h2{font-family:'Playfair Display',Georgia,serif;color:#f3ede3;font-size:25px;font-weight:600;margin:32px 0 12px;letter-spacing:.005em;}
+.bl-blog-content h3{font-family:'Playfair Display',Georgia,serif;color:#f3ede3;font-size:20px;font-weight:600;margin:26px 0 10px;}
+.bl-blog-content a{color:#c4803a;text-decoration:underline !important;}
 .bl-blog-content ul,.bl-blog-content ol{margin:0 0 18px;padding-left:22px;}
 .bl-blog-content li{margin-bottom:8px;}
 .bl-blog-content img{max-width:100%;border-radius:12px;margin:18px 0;}
-.bl-blog-content strong,.bl-blog-content b{color:#f2ede4;}
-.bl-navitem>div:first-child:hover{color:#d4af37;}
+.bl-blog-content strong,.bl-blog-content b{color:#f3ede3;}
+.bl-navitem>div:first-child:hover{color:#c4803a;}
 @media (min-width:577px){ .bl-mobile-menu{display:none !important;} }
-.bl-mobile-menu a:hover{ color:#d4af37; }
-.bl-lang a:hover{ color:#d4af37; }
+.bl-mobile-menu a:hover{ color:#c4803a; }
+.bl-lang a:hover{ color:#c4803a; }
 img[src*="tile.openstreetmap"]{filter:grayscale(.35) brightness(.82) contrast(1.05);}
 """
 
@@ -991,6 +1073,7 @@ for c in categories:
     popular.extend(svcs)
 data.service_categories=[c for c in categories if c["services"]]
 popular.sort(key=lambda s:s["price"]); data.popular_services=popular[:5]
+data.hero_services=popular[:3]
 
 revs=frappe.db.get_all("Testimonial", fields=["author_name","rating","service","source","review_text"], order_by="creation desc")
 for r in revs:
