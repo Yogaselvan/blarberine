@@ -574,7 +574,8 @@ def home():
     team=section([kicker(t("the_team")),h2(t("meet_barbers")),barbers_grid(),
         blk("div",children=[pill(t("meet_team_btn"),R_TEAM,solid=False)],styles={"display":"flex","justifyContent":"center","width":"100%","marginTop":"28px"})],
         bg=ALT)
-    return _body([nav("home"),hero(),info_bar(),stats_bar(),google_badge(),popular,team,before_after(),brands_strip(),faq_section(),booking_section(),contact_section(),footer()])
+    # google_badge() (Google reviews rating) removed 2026-07-07 per manager — no verified review data yet
+    return _body([nav("home"),hero(),info_bar(),stats_bar(),popular,team,before_after(),brands_strip(),faq_section(),booking_section(),contact_section(),footer()])
 
 def services_page():
     app=blk("div",attributes={"id":"services-app"},

@@ -13,11 +13,15 @@
     en:{select:"Select",selected:"✓ Selected",add:"+ Add",added:"✓ Added",show:"Show details",all:"All",
         pay:"Pay at venue",edit:"▸ Edit",hide:"▾ Hide",remove:"× Remove",choose:"Choose time",
         service:"service",services:"services",svcOf:"'s services",askStore:"Ask in-store for this barber's full menu.",
-        noBarbers:"No barbers yet.",errSvc:"Could not load services.",errTeam:"Could not load team."},
+        noBarbers:"No barbers yet.",errSvc:"Could not load services.",errTeam:"Could not load team.",
+        ckTitle:"We value your privacy",ckText:"We use essential cookies to run the site and, with your consent, analytics cookies to understand how it's used. You can change your choice anytime.",
+        ckAll:"Accept all",ckEss:"Essential only"},
     lt:{select:"Pasirinkti",selected:"✓ Pasirinkta",add:"+ Pridėti",added:"✓ Pridėta",show:"Plačiau",all:"Visos",
         pay:"Atsiskaitymas vietoje",edit:"▸ Redaguoti",hide:"▾ Slėpti",remove:"× Pašalinti",choose:"Pasirinkti laiką",
         service:"paslauga",services:"paslaugos",svcOf:" paslaugos",askStore:"Pilno meniu teiraukitės vietoje.",
-        noBarbers:"Kirpėjų nėra.",errSvc:"Nepavyko įkelti paslaugų.",errTeam:"Nepavyko įkelti komandos."}
+        noBarbers:"Kirpėjų nėra.",errSvc:"Nepavyko įkelti paslaugų.",errTeam:"Nepavyko įkelti komandos.",
+        ckTitle:"Gerbiame jūsų privatumą",ckText:"Naudojame būtinuosius slapukus svetainės veikimui ir, su jūsų sutikimu, analitikos slapukus, kad suprastume, kaip ji naudojama. Pasirinkimą galite keisti bet kada.",
+        ckAll:"Priimti visus",ckEss:"Tik būtinuosius"}
   };
   var L=I18N[LANG]||I18N.lt;
 
@@ -212,7 +216,50 @@
     });
   }
 
+  // ---- GDPR cookie consent + gated analytics ----
+  // Analytics (Google Analytics + Microsoft Clarity) load ONLY after the user
+  // clicks "Accept all". "Essential only" keeps them off. Choice persists in
+  // localStorage, so returning visitors aren't re-prompted and their analytics
+  // preference is honoured on every page.
+  var GA_ID="G-PQ24G6YJXV", CLARITY_ID="xidoncwq5i", CK_KEY="bl_cookie_consent";
+  function loadAnalytics(){
+    if(window.__blAnalytics) return; window.__blAnalytics=true;
+    var g=document.createElement("script"); g.async=true;
+    g.src="https://www.googletagmanager.com/gtag/js?id="+GA_ID;
+    document.head.appendChild(g);
+    window.dataLayer=window.dataLayer||[];
+    function gtag(){ window.dataLayer.push(arguments); }
+    window.gtag=gtag; gtag("js",new Date()); gtag("config",GA_ID);
+    (function(c,l,a,r,i,t,y){ c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r); t.async=1; t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t,y); })(window,document,"clarity","script",CLARITY_ID);
+  }
+  function ckGet(){ try{ return localStorage.getItem(CK_KEY); }catch(e){ return null; } }
+  function ckSet(v){ try{ localStorage.setItem(CK_KEY,v); }catch(e){} }
+  function showCookieBanner(){
+    if(document.getElementById("bl-cookie")) return;
+    var box=el("div","position:fixed;left:20px;bottom:20px;z-index:1000;max-width:410px;width:calc(100% - 40px);"+
+      "background:"+CARD+";border:1px solid "+BORDER+";border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.55);padding:20px 22px;");
+    box.id="bl-cookie";
+    box.appendChild(el("div","font-family:"+FONT+";font-size:15px;font-weight:700;color:"+INK+";margin-bottom:8px;",{text:L.ckTitle}));
+    box.appendChild(el("div","font-family:"+FONT+";font-size:13px;color:"+MUTED+";line-height:1.55;margin-bottom:16px;",{text:L.ckText}));
+    var btns=el("div","display:flex;gap:10px;flex-wrap:wrap;");
+    btns.appendChild(el("button","font-family:"+FONT+";flex:1;min-width:130px;background:"+CORAL+";color:#0d0d0d;font-weight:700;font-size:14px;padding:11px 16px;border:none;border-radius:8px;cursor:pointer;",
+      {text:L.ckAll,on:{click:function(){ ckSet("all"); box.remove(); loadAnalytics(); }}}));
+    btns.appendChild(el("button","font-family:"+FONT+";flex:1;min-width:130px;background:"+CARD+";color:"+INK+";font-weight:600;font-size:14px;padding:11px 16px;border:1px solid "+BORDER+";border-radius:8px;cursor:pointer;",
+      {text:L.ckEss,on:{click:function(){ ckSet("essential"); box.remove(); }}}));
+    box.appendChild(btns);
+    document.body.appendChild(box);
+  }
+  function initConsent(){
+    var c=ckGet();
+    if(c==="all"){ loadAnalytics(); return; }
+    if(c==="essential"){ return; }
+    showCookieBanner();
+  }
+
   ready(function(){
+    initConsent();
     wireMobileMenu();
     var sApp=document.getElementById("services-app");
     var tApp=document.getElementById("team-app");
