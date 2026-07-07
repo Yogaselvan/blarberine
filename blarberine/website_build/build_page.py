@@ -405,8 +405,8 @@ def nav(active="home"):
         "letterSpacing":"0.06em","textTransform":"uppercase","padding":"8px 2px","display":"inline-flex","alignItems":"center"})
     blog_link=_plain_link(t("nav_blog"),R_BLOG)
 
+    # "Services" removed from the nav 2026-07-07 (redundant — booking widget picks services)
     center=blk("div",classes=["bl-navlinks"],children=[
-        navitem(t("nav_services"),R_SERVICES,services_panel),
         navitem(t("nav_barbers"),R_TEAM,barbers_panel),
         blog_link, lang_dropdown(active)],
         styles={"display":"flex","flexDirection":"row","gap":"22px","alignItems":"center"},
@@ -423,7 +423,7 @@ def nav(active="home"):
     def mlink(label,href):
         return link(label,href,{"fontSize":"15px","color":INK,"fontWeight":"600","padding":"15px 4px","width":"100%","borderBottom":"1px solid "+BORDER,"display":"block"})
     mobile_menu=blk("div",classes=["bl-mobile-menu"],children=[
-        mlink(t("nav_services"),R_SERVICES),mlink(t("nav_barbers"),R_TEAM),mlink(t("nav_blog"),R_BLOG),
+        mlink(t("nav_barbers"),R_TEAM),mlink(t("nav_blog"),R_BLOG),
         blk("div",children=[lang_switcher(active)],styles={"display":"flex","paddingTop":"12px","paddingBottom":"6px"}),
         blk("div",children=[pill(t("book_now"),BOOK_HREF)],styles={"display":"flex","width":"100%","paddingTop":"6px","paddingBottom":"6px"})],
         styles={"display":"none","position":"absolute","top":"100%","left":"0","right":"0","width":"100%","flexDirection":"column",
@@ -568,18 +568,14 @@ def _body(children):
     return [b]
 
 def home():
-    pop=blk("div",children=[service_row()],isRepeater=True,dataKey={"key":"popular_services","comesFrom":"dataScript"},
-        styles={"display":"flex","flexDirection":"column","width":"100%"})
-    popular=section([blk("div",children=[
-        blk("div",children=[h2(t("popular_services")),link(t("see_all_services"),R_SERVICES,{"fontSize":"14px","color":CORAL,"fontWeight":"600"})],
-            styles={"display":"flex","flexDirection":"row","justifyContent":"space-between","alignItems":"center","width":"100%","flexWrap":"wrap","gap":"8px"}),
-        rows_shrinkwrap(pop)],styles=container("760px"))],width="760px")
     team=section([kicker(t("the_team")),h2(t("meet_barbers")),barbers_grid(),
         blk("div",children=[pill(t("meet_team_btn"),R_TEAM,solid=False)],styles={"display":"flex","justifyContent":"center","width":"100%","marginTop":"28px"})],
         bg=ALT)
-    # stats_bar() + google_badge() removed 2026-07-07 per manager (full red box) —
-    # placeholder counts (3000+ clients) and unverified Google rating; bring back with real data
-    return _body([nav("home"),hero(),info_bar(),popular,team,before_after(),brands_strip(),faq_section(),booking_section(),contact_section(),footer()])
+    # Popular services section removed 2026-07-07 (redundant — the booking widget
+    # already lets you pick a service). The "Book an appointment" widget takes its
+    # place, high on the page; Services also removed from the nav for the same reason.
+    # (stats_bar + google_badge removed earlier: placeholder/unverified data.)
+    return _body([nav("home"),hero(),info_bar(),booking_section(),team,before_after(),brands_strip(),faq_section(),contact_section(),footer()])
 
 def services_page():
     app=blk("div",attributes={"id":"services-app"},
