@@ -20,7 +20,7 @@
     lt:["Sekmadienis","Pirmadienis","Antradienis","Trečiadienis","Ketvirtadienis","Penktadienis","Šeštadienis"]};
   var I18N={
    en:{back:"← Back",all:"All",add:"+ Add",added:"✓ Added",yourAppt:"Your appointment",
-    basketSubHas:"Add treatments, then choose a time — pay at the venue.",basketSubEmpty:"Pick your treatments to get started.",
+    basketSubHas:"Choose a time next — pay at the venue.",basketSubEmpty:"Pick a treatment to get started.",
     totalPay:"Total · pay at venue",hideTreat:"− Hide treatments",addAnother:"+ Add another treatment",addTreat:"+ Add treatment",
     choose:"Choose time",selectTime:"Select time",anyPro:"Any professional",loadingAvail:"Loading availability…",
     fullyBooked:"Fully booked",nextAvail:"Next availability on",goTo:"Go to",finding:"Finding times…",noTimes:"No times left this day.",
@@ -37,7 +37,7 @@
     booking:"Booking…",errGeneric:"Something went wrong. Please try again.",errNet:"Network error. Please try again.",
     booked:"You're booked!",reference:"Reference:",bookAnother:"Book another",loadingBooking:"Loading booking…",errBooking:"Could not load booking. Please refresh."},
    lt:{back:"← Atgal",all:"Visos",add:"+ Pridėti",added:"✓ Pridėta",yourAppt:"Jūsų vizitas",
-    basketSubHas:"Pridėkite paslaugų ir pasirinkite laiką — atsiskaitoma vietoje.",basketSubEmpty:"Pasirinkite paslaugas, kad pradėtumėte.",
+    basketSubHas:"Toliau pasirinkite laiką — atsiskaitoma vietoje.",basketSubEmpty:"Pasirinkite paslaugą, kad pradėtumėte.",
     totalPay:"Iš viso · atsiskaitoma vietoje",hideTreat:"− Slėpti paslaugas",addAnother:"+ Pridėti dar paslaugą",addTreat:"+ Pridėti paslaugą",
     choose:"Pasirinkti laiką",selectTime:"Pasirinkite laiką",anyPro:"Bet kuris meistras",loadingAvail:"Kraunamas laisvas laikas…",
     fullyBooked:"Viskas užimta",nextAvail:"Artimiausias laisvas laikas:",goTo:"Eiti į",finding:"Ieškoma laikų…",noTimes:"Šią dieną laisvų laikų nėra.",
@@ -123,9 +123,10 @@
             var add=el("button","font-family:"+FONT+";font-size:13px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;flex-shrink:0;"+
               (inB?("background:#13291c;color:"+GREEN+";border:1px solid "+GREEN+";"):("background:"+CARD+";color:"+CORAL+";border:1px solid "+CORAL+";")),
               {text:inB?L.added:L.add});
-            add.addEventListener("click",function(){ var b=loadBasket(),i=-1; b.forEach(function(x,idx){if(x.name===s.name)i=idx;});
-              if(i>=0)b.splice(i,1); else b.push({name:s.name,service_name:s.service_name,price:s.price,price_display:s.price_display});
-              saveBasket(b); render(); });
+            // single service per booking: selecting one replaces any previous choice
+            add.addEventListener("click",function(){ var sel=names().indexOf(s.name)>-1;
+              saveBasket(sel?[]:[{name:s.name,service_name:s.service_name,price:s.price,price_display:s.price_display}]);
+              render(); });
             row.appendChild(left); row.appendChild(add); list.appendChild(row);
           });
         });
@@ -136,29 +137,9 @@
     function renderBasket(){
       var b=loadBasket();
       root.appendChild(h(L.yourAppt, b.length?L.basketSubHas:L.basketSubEmpty));
-      if(b.length){
-        var box=el("div","display:flex;flex-direction:column;gap:0;margin-bottom:6px;");
-        b.forEach(function(x){
-          var row=el("div","display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid "+BORDER+";");
-          var left=el("div"); left.appendChild(el("div","font-family:"+FONT+";font-size:16px;color:"+INK+";font-weight:600;",{text:x.service_name}));
-          left.appendChild(el("div","font-family:"+FONT+";font-size:13px;color:"+MUTED+";margin-top:2px;",{text:x.price_display}));
-          var rm=el("button","background:none;border:none;color:"+MUTED+";font-size:20px;cursor:pointer;line-height:1;",{text:"×",
-            on:{click:function(){ var bb=loadBasket().filter(function(y){return y.name!==x.name;}); saveBasket(bb); render(); }}});
-          row.appendChild(left); row.appendChild(rm); box.appendChild(row);
-        });
-        root.appendChild(box);
-        var tot=el("div","display:flex;justify-content:space-between;align-items:center;padding:16px 0;",{});
-        tot.appendChild(el("div","font-family:"+FONT+";font-size:15px;color:"+MUTED+";",{text:L.totalPay}));
-        tot.appendChild(el("div","font-family:"+FONT+";font-size:20px;color:"+INK+";font-weight:800;",{text:eur(total())}));
-        root.appendChild(tot);
-      }
-      // empty basket always shows the picker, so a toggle button there is dead weight
-      if(b.length){
-        var addBtn=el("button",GHOST+"margin-bottom:14px;",{text:state.showPicker?L.hideTreat:L.addAnother,
-          on:{click:function(){ state.showPicker=!state.showPicker; render(); }}});
-        root.appendChild(addBtn);
-      }
-      if(state.showPicker||!b.length) root.appendChild(servicePicker());
+      // one service per booking: always show the picker (single-select highlights the
+      // chosen service); once one is picked, offer "Choose time". No add-more button.
+      root.appendChild(servicePicker());
       if(b.length){
         var go=el("button",BTN+"width:100%;margin-top:16px;",{text:L.choose,on:{click:function(){ state.step="time"; state.date=null; state.slot=null; render(); }}});
         root.appendChild(go);

@@ -9,4 +9,4 @@ def execute():
     already configured."""
     frappe.db.set_single_value("System Settings", "time_zone", "Europe/Vilnius")
     if not frappe.conf.get("blarberine_notify_email"):
-        update_site_config("blarberine_notify_email", "roshinigdas126@gmail.com")
+        update_site_config("blarberine_notify_email", "yogaselvansaravanan557@gmail.com")

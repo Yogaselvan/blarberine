@@ -468,7 +468,10 @@ def footer():
             else:
                 ch.append(link(label,href,{"fontSize":"14px","color":"#b3ab98","marginBottom":"10px"}))
         return blk("div",children=ch,styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"180px"})
-    _footlogo=img("/assets/blarberine/images/logo.png",{"height":"50px","width":"auto","display":"block","marginBottom":"18px"})
+    # small, and alignSelf/flexShrink/objectFit stop the flex column from stretching
+    # the emblem into an "egg" (the manager's note)
+    _footlogo=img("/assets/blarberine/images/logo.png",{"height":"38px","width":"auto","display":"block",
+        "marginBottom":"18px","alignSelf":"flex-start","flexShrink":"0","objectFit":"contain","maxWidth":"100%"})
     _footlogo["attributes"]["alt"]="Blarberinė Kaunas"
     brand_col=blk("div",children=[
         _footlogo,

@@ -44,11 +44,10 @@
   function saveBasket(b){ try{ localStorage.setItem("bl_basket",JSON.stringify(b)); }catch(e){} }
   function inBasket(name){ return loadBasket().some(function(x){return x.name===name;}); }
   function toggleBasket(svc){
-    var b=loadBasket(), i=-1;
-    b.forEach(function(x,idx){ if(x.name===svc.name) i=idx; });
-    if(i>=0) b.splice(i,1);
-    else b.push({name:svc.name, service_name:svc.service_name, price:svc.price, price_display:svc.price_display});
-    saveBasket(b); renderBar(); return inBasket(svc.name);
+    // one service per booking: selecting a service replaces any previous choice
+    var was=inBasket(svc.name);
+    saveBasket(was?[]:[{name:svc.name, service_name:svc.service_name, price:svc.price, price_display:svc.price_display}]);
+    renderBar(); if(CURRENT_REFRESH) CURRENT_REFRESH(); return inBasket(svc.name);
   }
   function eur(v){ v=v||0; return (v===Math.round(v))?("€"+Math.round(v)):("€"+v.toFixed(2)); }
 

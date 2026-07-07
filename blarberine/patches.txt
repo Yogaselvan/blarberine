@@ -6,3 +6,5 @@
 # Patches added in this section will be executed after doctypes are migrated
 blarberine.patches.launch_defaults
 blarberine.patches.rebuild_pages_v1
+blarberine.patches.set_notify_email_v1
+blarberine.patches.rebuild_pages_v2
