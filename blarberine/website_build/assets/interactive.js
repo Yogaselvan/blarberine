@@ -59,15 +59,15 @@
 
   var bar=null, barOpen=false;
   function renderBar(){
+    // Always rebuild from scratch: reusing a cached node meant a bar that got
+    // detached from the DOM (never re-appended because `bar` was still set)
+    // would render the selection off-screen until a page refresh.
+    if(bar){ bar.remove(); bar=null; }
     var b=loadBasket();
-    if(!b.length){ barOpen=false; if(bar){ bar.remove(); bar=null; } return; }
+    if(!b.length){ barOpen=false; return; }
     var total=b.reduce(function(s,x){return s+(x.price||0);},0);
-    if(!bar){
-      bar=el("div","position:fixed;left:0;right:0;bottom:0;z-index:900;background:"+CARD+";border-top:1px solid "+BORDER+
-        ";box-shadow:0 -6px 24px rgba(0,0,0,.5);font-family:"+FONT+";");
-      document.body.appendChild(bar);
-    }
-    clear(bar);
+    bar=el("div","position:fixed;left:0;right:0;bottom:0;z-index:900;background:"+CARD+";border-top:1px solid "+BORDER+
+      ";box-shadow:0 -6px 24px rgba(0,0,0,.5);font-family:"+FONT+";");
     if(barOpen){
       var panel=el("div","max-width:1080px;margin:0 auto;padding:12px 24px 0;");
       b.forEach(function(x){
@@ -94,6 +94,7 @@
       "padding:12px 28px;border-radius:8px;text-decoration:none;cursor:pointer;flex-shrink:0;",{text:L.choose,href:BOOK});
     rowWrap.appendChild(info); rowWrap.appendChild(go);
     bar.appendChild(rowWrap);
+    document.body.appendChild(bar);
   }
 
   function selectBtn(svc){
@@ -165,6 +166,9 @@
     cats.forEach(function(c){ (c.services||[]).forEach(function(s){ svcMap[s.name]=s; catOf[s.name]=c.category_name; }); });
     if(!barbers.length){ app.appendChild(el("p","font-family:"+FONT+";color:"+MUTED,{text:L.noBarbers})); return; }
     var active=barbers[0];
+    // deep link from the nav dropdown: /team?pro=<Barber Name> pre-selects that barber
+    try{ var pro=new URLSearchParams(location.search).get("pro");
+      if(pro){ var f=barbers.filter(function(b){return b.name===pro;})[0]; if(f) active=f; } }catch(e){}
     var wrap=el("div","display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;");
     var listCol=el("div","display:flex;flex-direction:column;width:280px;flex-shrink:0;min-width:240px;");
     var panel=el("div","display:flex;flex-direction:column;flex:1;min-width:260px;");

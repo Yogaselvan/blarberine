@@ -70,7 +70,7 @@ T = {
  "hero_tag":{"en":"Book a chair with Kaunas' sharpest barbers. Walk-ins welcome, pay at the venue.",
              "lt":"Rezervuokite kėdę pas geriausius Kauno kirpėjus. Ateikite ir be registracijos, atsiskaitoma vietoje."},
  "view_services":{"en":"View services →","lt":"Peržiūrėti paslaugas →"},
- "address_line":{"en":"Kurpių g. 7, Kaunas, Lithuania","lt":"Kurpių g. 7, Kaunas, Lietuva"},
+ "address_line":{"en":"Utenos g. 16, Kaunas, Lithuania","lt":"Utenos g. 16, Kaunas, Lietuva"},
  "open_today":{"en":"Open today: 09:00 – 19:00","lt":"Šiandien dirbame: 09:00 – 19:00"},
  "show_details":{"en":"Show details","lt":"Plačiau"},
  "popular_services":{"en":"Popular services","lt":"Populiarios paslaugos"},
@@ -120,8 +120,8 @@ T = {
  "faq6_a":{"en":"Our barbers speak Lithuanian and English, so you'll feel at home whether you're local or just visiting.",
            "lt":"Mūsų kirpėjai kalba lietuvių ir anglų kalbomis, todėl jausitės patogiai — ar esate vietinis, ar svečias."},
  "faq7_q":{"en":"Where are you located?","lt":"Kur mus rasti?"},
- "faq7_a":{"en":"You'll find us at Kurpių g. 7 in the heart of Kaunas Old Town, a short walk from the Cathedral. Street parking is nearby.",
-           "lt":"Esame Kurpių g. 7, pačioje Kauno senamiesčio širdyje, vos kelios minutės nuo Katedros. Netoliese — vietos automobiliams gatvėje."},
+ "faq7_a":{"en":"You'll find us at Utenos g. 16, Kaunas. Street parking is nearby.",
+           "lt":"Esame Utenos g. 16, Kaune. Netoliese — vietos automobiliams gatvėje."},
  # Founder card — DUMMY content, Mantas to replace name/role/quote/bio/photo with the real founder.
  "founder_kicker":{"en":"Founder","lt":"Įkūrėjas"},
  "founder_name":{"en":"Mantas Petrauskas","lt":"Mantas Petrauskas"},
@@ -139,15 +139,15 @@ T = {
  "blog_read":{"en":"Read →","lt":"Skaityti →"},
  "blog_empty":{"en":"No posts yet — check back soon.","lt":"Kol kas įrašų nėra — užsukite netrukus."},
  "contact_kicker":{"en":"Contact","lt":"Kontaktai"},
- "contact_intro":{"en":"Drop by, call ahead, or get directions — we're in the heart of Kaunas Old Town.",
-                  "lt":"Užsukite, paskambinkite ar nuvykite pagal nuorodą — esame Kauno senamiesčio širdyje."},
+ "contact_intro":{"en":"Drop by, call ahead, or get directions — we're at Utenos g. 16 in Kaunas.",
+                  "lt":"Užsukite, paskambinkite ar nuvykite pagal nuorodą — esame Utenos g. 16, Kaune."},
  "con_address":{"en":"Address","lt":"Adresas"},
  "con_phone":{"en":"Phone","lt":"Telefonas"},
  "con_hours":{"en":"Opening hours","lt":"Darbo laikas"},
  "findus_kicker":{"en":"Visit","lt":"Užsukite"},
  "findus_title":{"en":"Find us in Kaunas","lt":"Raskite mus Kaune"},
- "findus_sub":{"en":"Kurpių g. 7, Kaunas Old Town — a short walk from the Cathedral.",
-               "lt":"Kurpių g. 7, Kauno senamiestis — vos kelios minutės nuo Katedros."},
+ "findus_sub":{"en":"Utenos g. 16, Kaunas, Lithuania.",
+               "lt":"Utenos g. 16, Kaunas, Lietuva."},
  "craft_kicker":{"en":"Our craft","lt":"Kirpimo menas"},
  "craft_title":{"en":"The art of a proper cut","lt":"Tikro kirpimo menas"},
  "craft_intro":{"en":"We don't rush. Every visit is an experience, not just a service — precise, clean and built to last.",
@@ -180,15 +180,15 @@ T = {
  "am_pay1":{"en":"Cash accepted","lt":"Priimame grynuosius"},
  "am_pay2":{"en":"Credit card accepted","lt":"Priimame kredito korteles"},
  "am_pay3":{"en":"Debit card accepted","lt":"Priimame debeto korteles"},
- "am_loc1":{"en":"Close to the Cathedral","lt":"Netoli Katedros"},
+ "am_loc1":{"en":"Easy to reach","lt":"Patogiai pasiekiama"},
  "am_loc2":{"en":"Street parking nearby","lt":"Vietos automobiliams gatvėje"},
  "am_loc3":{"en":"Bus stop nearby","lt":"Netoli autobusų stotelė"},
  "see_all_amenities":{"en":"See all 10 amenities","lt":"Rodyti visus 10 patogumų"},
  "about_desc":{"en":"Blarberinė is a neighbourhood barbershop built on craft and good conversation. For years we've kept Kaunas sharp with classic cuts, skin fades, beard sculpting and traditional hot-towel shaves. Walk-ins are welcome and bookings are recommended — payment is taken at the venue, cash or card.",
                "lt":"Blarberinė — kvartalo kirpykla, sukurta iš meistrystės ir gerų pokalbių. Jau daugelį metų palaikome kauniečius tvarkingus: klasikiniai kirpimai, perėjimai, barzdos modeliavimas ir tradicinis skutimas karštu rankšluosčiu. Laukiame ir be registracijos, tačiau rekomenduojame rezervuoti — atsiskaitoma vietoje, grynaisiais arba kortele."},
  "getting_here":{"en":"Getting here","lt":"Kaip mus rasti"},
- "getting_here_txt":{"en":"A short walk from the Cathedral. Street parking nearby.",
-                     "lt":"Vos kelios minutės pėsčiomis nuo Katedros. Netoliese – vietos automobiliams gatvėje."},
+ "getting_here_txt":{"en":"Utenos g. 16, Kaunas. Street parking nearby.",
+                     "lt":"Utenos g. 16, Kaunas. Netoliese – vietos automobiliams gatvėje."},
  "opening_hours":{"en":"Opening hours","lt":"Darbo laikas"},
  "closed":{"en":"Closed","lt":"Uždaryta"},
  "ready_fresh":{"en":"Ready for a fresh cut?","lt":"Pasiruošę naujam kirpimui?"},
@@ -202,7 +202,7 @@ T = {
  "foot_hours_sat":{"en":"Saturday  09:00–17:00","lt":"VI  09:00–17:00"},
  "foot_hours_sun":{"en":"Sunday  Closed","lt":"VII  Uždaryta"},
  "pay_at_venue":{"en":"Pay at venue","lt":"Atsiskaitymas vietoje"},
- "foot_city":{"en":"Kurpių g. 7, Kaunas","lt":"Kurpių g. 7, Kaunas"},
+ "foot_city":{"en":"Utenos g. 16, Kaunas","lt":"Utenos g. 16, Kaunas"},
  "foot_country":{"en":"Lithuania","lt":"Lietuva"},
  "foot_bottom":{"en":"Pay-at-venue only · Cash & card","lt":"Tik atsiskaitymas vietoje · Grynaisiais ir kortele"},
  "copyright":{"en":"© 2026 Blarberinė","lt":"© 2026 Blarberinė"},
@@ -323,10 +323,12 @@ def section(children,*,bg=BG,pad="56px",width="1040px",attributes=None,name=None
 
 def u(path): return path
 
-def _menu_link(label,href,key=None):
+def _menu_link(label,href,key=None,href_key=None):
     b=link(label,href,{"fontSize":"14px","color":INK,"fontWeight":"500","padding":"9px 10px",
         "borderRadius":"8px","width":"100%"},classes=["bl-menu-link"])
     if key: b["dataKey"]={"key":key,"type":"key","property":"innerHTML"}
+    # bind the href per repeated item (e.g. each barber -> /team?pro=<name>)
+    if href_key: b["dynamicValues"]=[{"key":href_key,"type":"attribute","property":"href","comesFrom":"dataScript"}]
     return b
 
 def _menu_panel(children,width="260px"):
@@ -394,7 +396,7 @@ def nav(active="home"):
         styles={"display":"flex","flexDirection":"row","gap":"12px","paddingLeft":"14px","borderLeft":"1px solid "+BORDER})
     services_panel=_menu_panel([blk("div",children=[left_col,promos],styles={"display":"flex","flexDirection":"row","gap":"14px"})],width="520px")
 
-    barber_rep=blk("div",children=[_menu_link("Barber",R_TEAM,key="barber_name")],isRepeater=True,
+    barber_rep=blk("div",children=[_menu_link("Barber",R_TEAM,key="barber_name",href_key="href")],isRepeater=True,
         dataKey={"key":"barbers","comesFrom":"dataScript"},
         styles={"display":"flex","flexDirection":"column","width":"100%"})
     barbers_panel=_menu_panel([
@@ -626,7 +628,7 @@ def blog_list():
     return _body([nav("blog"),section([head,grid]),footer()])
 
 def about_page():
-    gmaps="https://www.google.com/maps/search/?api=1&query=Kurpi%C5%B3+g.+7+Kaunas+Lithuania"
+    gmaps="https://www.google.com/maps/search/?api=1&query=Utenos+g.+16+Kaunas+Lithuania"
     Z, cx, cy = 15, 18557, 10380
     tiles=[]
     for y in (cy, cy+1):
@@ -644,7 +646,7 @@ def about_page():
         styles={"fontFamily":FONT,"fontSize":"14px","color":CORAL,"fontWeight":"600","textDecoration":"none","marginTop":"14px","width":"fit-content"})
     addr=blk("div",children=[
         text("Blarberinė",{"fontFamily":HEAD,"fontSize":"20px","color":GOLD,"fontWeight":"600","letterSpacing":"0.04em","marginBottom":"6px"}),
-        text("Kurpių g. 7",{"fontSize":"15px","color":BODY}),text(t("addr_city"),{"fontSize":"15px","color":BODY}),
+        text("Utenos g. 16",{"fontSize":"15px","color":BODY}),text(t("addr_city"),{"fontSize":"15px","color":BODY}),
         text("+370 600 00000",{"fontSize":"15px","color":BODY,"marginTop":"10px"}),
         directions],
         styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"220px"})
@@ -831,11 +833,11 @@ def brands_strip():
     return section([head,row],bg=ALT)
 
 def contact_section():
-    q="Kurpi%C5%B3+g.+7+Kaunas"
+    q="Utenos+g.+16+Kaunas"
     directions_url="https://www.google.com/maps/dir/?api=1&destination="+q
     # interactive google map
     iframe=blk("iframe",attributes={"src":"https://maps.google.com/maps?q="+q+"&z=16&output=embed",
-        "loading":"lazy","title":"Blarberinė — Kurpių g. 7, Kaunas","allowfullscreen":""},
+        "loading":"lazy","title":"Blarberinė — Utenos g. 16, Kaunas","allowfullscreen":""},
         styles={"width":"100%","height":"100%","border":"0","display":"block"})
     box=blk("div",children=[iframe],styles={"width":"100%","height":"380px","overflow":"hidden",
         "borderRadius":"16px","border":"1px solid "+BORDER,"flex":"1.25","minWidth":"300px"},mobileStyles={"height":"300px"})
@@ -953,7 +955,7 @@ def make_data_script(lang):
     # extra social/OG tags safe for every page in this language (Builder merges page_data.metatags)
     _locale = "lt_LT" if lang == "lt" else "en_US"
     blog_src += '\ndata.metatags = {"og:site_name": "Blarberinė", "og:locale": "%s"}' % _locale
-    return '''# Blarberine shared page data (%s) — live from DocTypes.
+    script = '''# Blarberine shared page data (%s) — live from DocTypes.
 %s
 def trx(s, TR=TR):
     return TR.get(s, s) if s else s
@@ -1015,6 +1017,12 @@ data.review_breakdown=brk
 %s
 ''' % (lang, tr_src, mins, ("nuo" if lang=="lt" else "from"),
        ("atsiliepimai" if lang=="lt" else "reviews"), blog_src)
+    # per-barber deep link for the nav dropdown: /team?pro=<Barber Name>
+    # (appended outside the %-template so the literal "%20" survives; note the
+    # loop var must NOT start with "_" — RestrictedPython forbids that)
+    script += ('\nfor nb in data.barbers:\n'
+               '    nb["href"] = ' + repr(R_TEAM) + ' + "?pro=" + nb["name"].replace(" ", "%20")\n')
+    return script
 
 PAGES={"home":home,"services":services_page,"team":team_page,"blog":blog_list}
 
@@ -1026,9 +1034,9 @@ FAVICON="/assets/blarberine/images/favicon.png"
 SEO={
  "home":{
    "lt":("Blarberinė – Barbershop Kaune | Kirpimai, barzdos, skutimas",
-         "Vyriška kirpykla Kauno senamiestyje (Kurpių g. 7). Klasikiniai kirpimai, perėjimai, barzdos formavimas ir skutimas karštu rankšluosčiu. Registruokitės internetu — atsiskaitoma vietoje."),
+         "Vyriška kirpykla Kaune (Utenos g. 16). Klasikiniai kirpimai, perėjimai, barzdos formavimas ir skutimas karštu rankšluosčiu. Registruokitės internetu — atsiskaitoma vietoje."),
    "en":("Blarberinė – Barbershop Kaunas | Cuts, Beards & Shaves",
-         "Men's barbershop in Kaunas Old Town (Kurpių g. 7). Classic cuts, skin fades, beard shaping and hot-towel shaves. Book online — pay at the venue.")},
+         "Men's barbershop in Kaunas (Utenos g. 16). Classic cuts, skin fades, beard shaping and hot-towel shaves. Book online — pay at the venue.")},
  "services":{
    "lt":("Paslaugos ir kainos — Blarberinė Kaunas",
          "Blarberinės kainoraštis: vyriški kirpimai nuo €12, barzdos priežiūra, perėjimai ir skutimas. Registruokitės internetu, atsiskaitoma vietoje."),
@@ -1041,9 +1049,9 @@ SEO={
          "Meet the barbers at Blarberinė in Kaunas — experienced masters, classic and modern cuts. Book your barber online.")},
  "about":{
    "lt":("Apie mus — Blarberinė Kaunas",
-         "Blarberinė — kvartalo kirpykla Kauno senamiestyje. Meistrystė, tradicijos ir dėmesys detalėms. Kurpių g. 7, Kaunas."),
+         "Blarberinė — kvartalo kirpykla Kaune. Meistrystė, tradicijos ir dėmesys detalėms. Utenos g. 16, Kaunas."),
    "en":("About — Blarberinė Kaunas",
-         "Blarberinė — a neighbourhood barbershop in Kaunas Old Town. Craft, tradition and attention to detail. Kurpių g. 7, Kaunas.")},
+         "Blarberinė — a neighbourhood barbershop in Kaunas. Craft, tradition and attention to detail. Utenos g. 16, Kaunas.")},
  "blog":{
    "lt":("Blogas — patarimai ir naujienos | Blarberinė Kaunas",
          "Vyriškos priežiūros patarimai, stiliaus gidai ir naujienos iš Blarberinės kirpyklos Kaune."),

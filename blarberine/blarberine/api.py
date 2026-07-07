@@ -20,7 +20,7 @@ WEEKDAYS = [
 MIN_LEAD_MINUTES = 15
 
 SHOP_NAME = "Blarberinė"
-SHOP_ADDRESS = "Kurpių g. 7, Kaunas"
+SHOP_ADDRESS = "Utenos g. 16, Kaunas"
 
 
 def _to_minutes(value):
