@@ -8,10 +8,10 @@ article section in between. No template duplication — the blog inherits the si
 import json
 import frappe
 
-BG = "#1a140e"; ALT = "#221a12"; INK = "#f3ede3"; BODY = "#cfc5b6"; MUTED = "#9a8e7c"
-BORDER = "#3a2f22"; GOLD = "#c4803a"; CARD = "#241c14"
+BG = "#faf8f3"; ALT = "#f1ece2"; INK = "#26211a"; BODY = "#57503f"; MUTED = "#8c8271"
+BORDER = "#e6dfd0"; GOLD = "#b3873c"; CARD = "#ffffff"
 FONT = "'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-HEAD = "'Oswald', 'Arial Narrow', 'Helvetica Neue', sans-serif"
+HEAD = "'Cormorant Garamond', 'Playfair Display', Georgia, serif"
 
 _counter = [0]
 

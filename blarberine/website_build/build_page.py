@@ -20,32 +20,35 @@ def _routes(lang):
     return {"home": "en", "services": "en/services", "team": "en/team", "blog": "en/blog"}
 ROUTES = {l: _routes(l) for l in LANGS}
 
-# Espresso + cream + copper — 2026-07-07 redesign cloned from the approved
-# reference layout (dark hero with booking card + giant condensed headline,
-# cream content sections). Dark tokens keep their old names so every existing
-# section reskins automatically; L* tokens are for the new cream sections.
-BG="#1a140e"; ALT="#221a12"; INK="#f3ede3"; BODY="#cfc5b6"; MUTED="#9a8e7c"
-BORDER="#3a2f22"; CORAL="#c4803a"; NAVY="#140f0a"; GOLD="#c4803a"; CARD="#241c14"
-BAR_Y,BAR_B,BAR_T="#c4803a","#7d5124","#e2b988"
-LBG="#f3ede3"; LCARD="#faf7f2"; LINK="#221a12"; LMUT="#6e6455"; LLINE="#ddd3c2"
+# v3 LIGHT PREMIUM (2026-07-07, owner brief: light colors, premium feel,
+# animations, simple hero with one Book-now CTA). Ivory canvas, white cards,
+# charcoal text, gold-bronze accent, dark footer band for contrast, serif
+# display headings. Token ROLES kept: INK/BODY/MUTED are text (dark now),
+# BG/ALT/CARD are light surfaces, NAVY is the dark footer/brands band.
+BG="#faf8f3"; ALT="#f1ece2"; INK="#26211a"; BODY="#57503f"; MUTED="#8c8271"
+BORDER="#e6dfd0"; CORAL="#b3873c"; NAVY="#181410"; GOLD="#b3873c"; CARD="#ffffff"
+BAR_Y,BAR_B,BAR_T="#b3873c","#8a6527","#dcc28a"
+LBG="#ffffff"; LCARD="#faf8f3"; LINK="#26211a"; LMUT="#8c8271"; LLINE="#e6dfd0"
 FONT="'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-HEAD="'Oswald', 'Arial Narrow', 'Helvetica Neue', sans-serif"
-HERO_IMG="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=1800&q=80"
-
+HEAD="'Cormorant Garamond', 'Playfair Display', Georgia, serif"
+# High-quality, verified barbershop photography (all return 200 at these
+# widths). Placeholders until Mantas supplies the shop's own photos.
+_U="https://images.unsplash.com/photo-%s?auto=format&fit=crop&w=%d&q=80"
+HERO_IMG=_U % ("1585747860715-2ba37e788b70", 2100)   # warm premium interior
 GALLERY=[
- "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=900&q=80",
- "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=900&q=80",
- "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=900&q=80"]
+ _U % ("1503951914875-452162b0f3f1", 1400),   # hot-towel shave
+ _U % ("1622286342621-4bd786c2447c", 1400),   # cut in progress
+ _U % ("1599351431202-1e0f0137899a", 1400)]   # skin fade + razor detail
 WORK=[
- "https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&w=600&q=80",
- "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=600&q=80",
- "https://images.unsplash.com/photo-1503443207922-dff7d543fd0e?auto=format&fit=crop&w=600&q=80",
- "https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=600&q=80",
- "https://images.unsplash.com/photo-1593702275687-f8b402bf1fb5?auto=format&fit=crop&w=600&q=80",
- "https://images.unsplash.com/photo-1517832606299-7ae9b720a186?auto=format&fit=crop&w=600&q=80"]
+ _U % ("1521119989659-a83eee488004", 1100),   # groomed portrait (barber-card fallback)
+ _U % ("1593702275687-f8b402bf1fb5", 1100),   # fade
+ _U % ("1596728325488-58c87691e9af", 1100),   # straight-razor
+ _U % ("1517832606299-7ae9b720a186", 1100),   # dramatic shave
+ _U % ("1605497788044-5a32c7078486", 1100),   # styling / blow-dry
+ _U % ("1512690459411-b9245aed614b", 1100)]   # vintage chair detail
 PROMO=[
- "https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=500&q=80",
- "https://images.unsplash.com/photo-1622287162716-f311baa1a2b8?auto=format&fit=crop&w=500&q=80"]
+ _U % ("1596728325488-58c87691e9af", 800),
+ _U % ("1512690459411-b9245aed614b", 800)]
 
 # PLACEHOLDER pro-barber grooming brands — Mantas to confirm the real ones the shop uses.
 BRANDS=[("American Crew","american-crew"),("STMNT Grooming","stmnt"),("Wahl Professional","wahl"),
@@ -53,7 +56,7 @@ BRANDS=[("American Crew","american-crew"),("STMNT Grooming","stmnt"),("Wahl Prof
 # PLACEHOLDER before/after pairs (known-good stock) — Mantas to send REAL client before/after photos.
 BEFORE_AFTER=[(WORK[2],WORK[0]),(WORK[3],WORK[1]),(WORK[5],WORK[4])]
 # DUMMY founder portrait — replace with the real founder's photo.
-FOUNDER_PHOTO="https://images.unsplash.com/photo-1503443207922-dff7d543fd0e?auto=format&fit=crop&w=760&q=80"
+FOUNDER_PHOTO=_U % ("1521119989659-a83eee488004", 800)
 
 # ---------------------------------------------------------------- i18n
 T = {
@@ -308,7 +311,7 @@ def container(width="1040px",**extra):
     s={"display":"flex","flexDirection":"column","width":"100%","maxWidth":width,"flexShrink":0}; s.update(extra); return s
 
 def pill(label,href,*,solid=True,small=False):
-    if solid: bg,col,bd=GOLD,"#1a140e","none"
+    if solid: bg,col,bd=GOLD,"#ffffff","none"
     else: bg,col,bd="transparent",GOLD,"1px solid "+GOLD
     return link(label,href,{"display":"inline-flex","alignItems":"center","justifyContent":"center",
         "backgroundColor":bg,"color":col,"border":bd,"fontWeight":"600",
@@ -320,8 +323,8 @@ def pill(label,href,*,solid=True,small=False):
 def stars(size=16,color=GOLD):
     return text("★★★★★",{"fontSize":"%dpx"%size,"color":color,"letterSpacing":"2px","lineHeight":"1"})
 
-def kicker(l,color=CORAL): return text(l,{"fontSize":"12px","letterSpacing":"0.2em","textTransform":"uppercase","color":color,"fontWeight":"700","marginBottom":"10px"})
-def h2(l,color=INK): return text(l,{"fontFamily":HEAD,"fontSize":"42px","color":color,"fontWeight":"600","marginBottom":"20px","letterSpacing":"0.03em","lineHeight":"1.1","textTransform":"uppercase"},tag="h2",mob={"fontSize":"30px","marginBottom":"16px","lineHeight":"1.15"})
+def kicker(l,color=CORAL): return text(l,{"fontSize":"12px","letterSpacing":"0.22em","textTransform":"uppercase","color":color,"fontWeight":"700","marginBottom":"12px"})
+def h2(l,color=INK): return text(l,{"fontFamily":HEAD,"fontSize":"44px","color":color,"fontWeight":"600","marginBottom":"20px","letterSpacing":"0.01em","lineHeight":"1.12"},tag="h2",mob={"fontSize":"31px","marginBottom":"16px","lineHeight":"1.18"})
 
 def tri_bar(mt="0",mb="0"):
     seg=lambda c: blk("div",styles={"backgroundColor":c,"height":"4px","flex":"1"})
@@ -329,7 +332,9 @@ def tri_bar(mt="0",mb="0"):
 
 def section(children,*,bg=BG,pad="56px",width="1040px",attributes=None,name=None,align="center"):
     inner=blk("div",children=children,styles=container(width))
-    return blk("section",children=[inner],attributes=attributes,name=name,styles={
+    # bl-reveal: fade/slide-in on scroll (activated by interactive.js; without
+    # JS the class is inert and everything stays visible)
+    return blk("section",children=[inner],attributes=attributes,name=name,classes=["bl-reveal"],styles={
         "display":"flex","flexDirection":"column","alignItems":align,"width":"100%","flexShrink":0,
         "backgroundColor":bg,"paddingTop":pad,"paddingBottom":pad,"paddingLeft":"24px","paddingRight":"24px"},
         mobileStyles={"paddingTop":"40px","paddingBottom":"40px","paddingLeft":"16px","paddingRight":"16px"})
@@ -348,7 +353,7 @@ def _menu_panel(children,width="260px"):
     return blk("div",classes=["bl-menu"],children=children,styles={
         "position":"absolute","top":"100%","right":"0","minWidth":width,
         "backgroundColor":CARD,"borderRadius":"14px","border":"1px solid "+BORDER,
-        "boxShadow":"0 18px 50px rgba(0,0,0,0.6)","padding":"14px","zIndex":"60",
+        "boxShadow":"0 18px 50px rgba(38,33,26,0.14)","padding":"14px","zIndex":"60",
         "display":"flex","flexDirection":"column","gap":"2px"})
 
 def lang_switcher(active):
@@ -372,13 +377,13 @@ def lang_dropdown(active):
              "padding":"9px 12px","borderRadius":"8px","width":"100%"},classes=["bl-menu-link"])
     panel=blk("div",classes=["bl-menu"],children=[opt("lt","Lietuvių"),opt("en","English")],
         styles={"position":"absolute","top":"100%","right":"0","minWidth":"150px","backgroundColor":CARD,
-            "borderRadius":"12px","border":"1px solid "+BORDER,"boxShadow":"0 18px 50px rgba(0,0,0,0.6)",
+            "borderRadius":"12px","border":"1px solid "+BORDER,"boxShadow":"0 18px 50px rgba(38,33,26,0.14)",
             "padding":"8px","zIndex":"60","display":"flex","flexDirection":"column","gap":"2px"})
     return blk("div",classes=["bl-navitem"],children=[trig,panel],
         styles={"position":"relative","display":"flex","flexDirection":"row","alignItems":"center"})
 
 def nav(active="home"):
-    _navlogo=img("/assets/blarberine/images/logo-cream.png",{"height":"42px","width":"auto","display":"block"})
+    _navlogo=img("/assets/blarberine/images/logo-dark.png",{"height":"42px","width":"auto","display":"block"})
     _navlogo["attributes"]["alt"]="Blarberinė Kaunas"
     _navlogo["mobileStyles"]={"height":"30px"}
     brand=blk("a",attributes={"href":R_HOME},children=[_navlogo],
@@ -442,12 +447,12 @@ def nav(active="home"):
         blk("div",children=[lang_switcher(active)],styles={"display":"flex","paddingTop":"12px","paddingBottom":"6px"}),
         blk("div",children=[pill(t("book_now"),BOOK_HREF)],styles={"display":"flex","width":"100%","paddingTop":"6px","paddingBottom":"6px"})],
         styles={"display":"none","position":"absolute","top":"100%","left":"0","right":"0","width":"100%","flexDirection":"column",
-            "backgroundColor":CARD,"borderBottom":"1px solid "+BORDER,"boxShadow":"0 14px 34px rgba(0,0,0,0.6)",
+            "backgroundColor":CARD,"borderBottom":"1px solid "+BORDER,"boxShadow":"0 14px 34px rgba(38,33,26,0.14)",
             "paddingLeft":"20px","paddingRight":"20px","paddingBottom":"10px","zIndex":"55"})
     return blk("header",children=[row,mobile_menu],name="nav",classes=["bl-nav"],styles={
         "display":"flex","flexDirection":"row","justifyContent":"center","alignItems":"center","width":"100%",
         "flexShrink":0,"position":"sticky","top":"0","zIndex":"50","paddingTop":"14px","paddingBottom":"14px",
-        "paddingLeft":"24px","paddingRight":"24px","backgroundColor":"rgba(13,13,13,0.9)",
+        "paddingLeft":"24px","paddingRight":"24px","backgroundColor":"rgba(250,248,243,0.92)",
         "backdropFilter":"blur(10px)","borderBottom":"1px solid "+BORDER},
         mobileStyles={"paddingLeft":"16px","paddingRight":"16px"})
 
@@ -538,7 +543,7 @@ def barber_card():
     name=text("Barber",{"fontFamily":HEAD,"fontSize":"22px","color":LINK,"fontWeight":"600","marginTop":"16px",
         "textTransform":"uppercase","letterSpacing":"0.03em"},key="barber_name",tag="h3")
     bio=text("Bio",{"fontSize":"14px","color":LMUT,"lineHeight":"1.55","marginTop":"6px","width":"auto"},key="bio")
-    return blk("div",children=[photo,name,bio],styles={"display":"flex","flexDirection":"column","width":"100%",
+    return blk("div",children=[photo,name,bio],classes=["bl-lift"],styles={"display":"flex","flexDirection":"column","width":"100%",
         "backgroundColor":LCARD,"border":"1px solid "+LLINE,"borderRadius":"16px",
         "paddingTop":"14px","paddingBottom":"22px","paddingLeft":"14px","paddingRight":"14px"})
 
@@ -557,7 +562,9 @@ def works_gallery():
                 "width":"100%","marginBottom":"28px"})
     cells=[]
     for src in [GALLERY[0],WORK[1],GALLERY[1],WORK[4],WORK[3],GALLERY[2]]:
-        cells.append(img(src,{"width":"100%","height":"250px","objectFit":"cover","borderRadius":"14px","display":"block"}))
+        ph=img(src,{"width":"100%","height":"250px","objectFit":"cover","display":"block"})
+        cells.append(blk("div",children=[ph],classes=["bl-zoom"],
+            styles={"borderRadius":"14px","overflow":"hidden","width":"100%"}))
     grid=blk("div",children=cells,styles={"display":"grid","gridTemplateColumns":"repeat(3, 1fr)","gap":"22px","width":"100%"},
         mobileStyles={"gridTemplateColumns":"1fr","gap":"14px"})
     return section([head,grid],bg=LBG)
@@ -591,44 +598,31 @@ def join_strip():
 
 # ================================================================= HERO
 def hero():
-    # ---- left: booking quick-card (live top services + CTA to the real widget)
-    card_title=text(t("book_appt"),{"fontFamily":HEAD,"fontSize":"30px","color":INK,"fontWeight":"600",
-        "textTransform":"uppercase","letterSpacing":"0.03em","marginBottom":"4px"},tag="h2")
-    card_sub=text(t("pay_at_venue")+" — "+t("no_card"),{"fontSize":"13px","color":MUTED,"marginBottom":"16px","width":"auto","lineHeight":"1.5"})
-    svc_name=text("Service",{"fontSize":"14px","color":INK,"fontWeight":"600"},key="service_name")
-    svc_meta=text("30 min",{"fontSize":"12px","color":MUTED,"marginTop":"2px"},key="duration_display")
-    svc_left=blk("div",children=[svc_name,svc_meta],styles={"display":"flex","flexDirection":"column","minWidth":"0"})
-    svc_price=text("€25",{"fontFamily":HEAD,"fontSize":"20px","color":CORAL,"fontWeight":"600","flexShrink":"0"},key="price_display")
-    svc_row=blk("div",children=[svc_left,svc_price],styles={"display":"flex","flexDirection":"row","justifyContent":"space-between",
-        "alignItems":"center","gap":"12px","width":"100%","paddingTop":"11px","paddingBottom":"11px","borderBottom":"1px solid "+BORDER})
-    svc_rep=blk("div",children=[svc_row],isRepeater=True,dataKey={"key":"hero_services","comesFrom":"dataScript"},
-        styles={"display":"flex","flexDirection":"column","width":"100%","marginBottom":"18px"})
-    card_btn=pill(t("book_now"),BOOK_HREF,solid=True)
-    card_btn["baseStyles"].update({"width":"100%","fontSize":"15px"})
-    card=blk("div",children=[card_title,card_sub,svc_rep,card_btn],
-        styles={"display":"flex","flexDirection":"column","width":"400px","flexShrink":"0",
-            "backgroundColor":"rgba(26,20,14,0.88)","border":"1px solid "+BORDER,"borderRadius":"16px",
-            "backdropFilter":"blur(6px)","paddingTop":"28px","paddingBottom":"28px","paddingLeft":"28px","paddingRight":"28px"},
-        mobileStyles={"width":"100%","paddingTop":"20px","paddingBottom":"20px","paddingLeft":"18px","paddingRight":"18px"})
-    # ---- right: trust line + giant condensed headline, bottom-right like the reference
-    rating=blk("div",children=[stars(15),text(t("trusted"),{"fontSize":"13px","color":BODY,"fontWeight":"600",
-        "letterSpacing":"0.1em","textTransform":"uppercase"})],
-        styles={"display":"flex","flexDirection":"row","alignItems":"center","gap":"10px","marginBottom":"14px","justifyContent":"flex-end"},
-        mobileStyles={"justifyContent":"flex-start"})
-    headline=text(t("hero_head"),{"fontFamily":HEAD,"fontSize":"64px","color":INK,"fontWeight":"600","lineHeight":"1.04",
-        "textTransform":"uppercase","letterSpacing":"0.02em","textAlign":"right","maxWidth":"620px","width":"auto"},
-        tag="h1",mob={"fontSize":"36px","textAlign":"left"})
-    right=blk("div",children=[rating,headline],styles={"display":"flex","flexDirection":"column","flex":"1","minWidth":"300px",
-        "alignItems":"flex-end","justifyContent":"flex-end","paddingBottom":"8px"},
-        mobileStyles={"alignItems":"flex-start"})
-    row=blk("div",children=[card,right],styles={"display":"flex","flexDirection":"row","gap":"40px","width":"100%","maxWidth":"1180px",
-        "alignItems":"stretch","minHeight":"560px"},
-        mobileStyles={"flexDirection":"column-reverse","gap":"28px","minHeight":"0"})
-    return blk("section",children=[row],styles={"display":"flex","flexDirection":"column","alignItems":"center","width":"100%",
-        "flexShrink":0,"paddingTop":"56px","paddingBottom":"48px","paddingLeft":"24px","paddingRight":"24px",
-        "backgroundImage":"linear-gradient(100deg, rgba(26,20,14,0.82) 0%, rgba(26,20,14,0.45) 55%, rgba(26,20,14,0.72) 100%), url('"+HERO_IMG+"')",
-        "backgroundSize":"cover","backgroundPosition":"center"},
-        mobileStyles={"paddingTop":"28px","paddingBottom":"28px","paddingLeft":"16px","paddingRight":"16px"})
+    # Full-bleed background photo, text overlaid on top (owner brief). Text is
+    # light against the photo; a left-weighted dark gradient keeps it legible
+    # while the image stays visible on the right.
+    HW="#ffffff"; HSUB="#ece5d8"
+    rating=blk("div",children=[stars(15,color="#e2b988"),text(t("trusted")+" · Kaunas",{"fontSize":"13px","color":HSUB,
+        "fontWeight":"600","letterSpacing":"0.14em","textTransform":"uppercase"})],
+        styles={"display":"flex","flexDirection":"row","alignItems":"center","gap":"10px","marginBottom":"22px"},
+        mobileStyles={"flexWrap":"wrap","gap":"6px"})
+    headline=text(t("hero_head"),{"fontFamily":HEAD,"fontSize":"72px","color":HW,"fontWeight":"600",
+        "lineHeight":"1.05","letterSpacing":"0.005em","maxWidth":"640px","width":"auto","marginBottom":"22px",
+        "textShadow":"0 2px 30px rgba(0,0,0,0.35)"},tag="h1",mob={"fontSize":"42px","lineHeight":"1.1"})
+    tag=text(t("hero_tag"),{"fontSize":"18px","color":HSUB,"lineHeight":"1.7","maxWidth":"480px","marginBottom":"36px","width":"auto"})
+    cta=pill(t("book_now"),BOOK_HREF,solid=True)
+    cta["baseStyles"].update({"fontSize":"16px","paddingLeft":"42px","paddingRight":"42px","paddingTop":"16px","paddingBottom":"16px",
+        "boxShadow":"0 14px 36px rgba(179,135,60,0.5)"})
+    cta["classes"]=["bl-cta"]
+    inner=blk("div",children=[rating,headline,tag,cta],styles={"display":"flex","flexDirection":"column",
+        "width":"100%","maxWidth":"1180px","alignItems":"flex-start"})
+    return blk("section",children=[inner],classes=["bl-reveal"],styles={"display":"flex","flexDirection":"column",
+        "justifyContent":"center","alignItems":"center","width":"100%","flexShrink":0,"minHeight":"88vh",
+        "paddingTop":"96px","paddingBottom":"96px","paddingLeft":"48px","paddingRight":"48px",
+        "backgroundImage":"linear-gradient(90deg, rgba(20,16,12,0.82) 0%, rgba(20,16,12,0.5) 48%, rgba(20,16,12,0.22) 100%), url('"+HERO_IMG+"')",
+        "backgroundSize":"cover","backgroundPosition":"center","backgroundRepeat":"no-repeat"},
+        mobileStyles={"minHeight":"78vh","paddingTop":"64px","paddingBottom":"64px","paddingLeft":"22px","paddingRight":"22px",
+            "backgroundImage":"linear-gradient(180deg, rgba(20,16,12,0.5) 0%, rgba(20,16,12,0.8) 100%), url('"+HERO_IMG+"')"})
 
 def info_bar():
     def item(icon,label):
@@ -847,7 +841,7 @@ def google_badge():
     letters=[text(ch,{"fontFamily":FONT,"fontSize":"21px","fontWeight":"700","color":c,"lineHeight":"1"}) for ch,c in goog]
     wordmark=blk("div",children=letters,styles={"display":"flex","flexDirection":"row","alignItems":"center"})
     st=text("★★★★★",{"fontSize":"18px","color":"#fbbc05","letterSpacing":"2px","lineHeight":"1"})
-    rating=text("5.0",{"fontFamily":FONT,"fontSize":"20px","fontWeight":"700","color":"#241c14","lineHeight":"1"})
+    rating=text("5.0",{"fontFamily":FONT,"fontSize":"20px","fontWeight":"700","color":"#ffffff","lineHeight":"1"})
     cnt=text(t("google_reviews_count"),{"fontSize":"13px","color":"#5f6368","fontWeight":"500"})
     inner=blk("div",children=[wordmark,st,rating,cnt],styles={"display":"flex","flexDirection":"row","alignItems":"center",
         "gap":"14px","flexWrap":"wrap","justifyContent":"center"})
@@ -898,6 +892,8 @@ def faq_section():
     return section([head,col],bg=LBG)
 
 def brands_strip():
+    # dark band on the light site — gives the page rhythm and the cream-tinted
+    # brand logos need a dark surface
     logos=[]
     for nm,slug in BRANDS:
         lg=img("/assets/blarberine/images/brands/%s.png"%slug,
@@ -909,10 +905,10 @@ def brands_strip():
     row=blk("div",children=logos,styles={"display":"flex","flexDirection":"row","flexWrap":"wrap",
         "justifyContent":"center","alignItems":"center","columnGap":"48px","rowGap":"22px","width":"100%","marginTop":"8px"},
         mobileStyles={"columnGap":"28px","rowGap":"18px"})
-    head=blk("div",children=[kicker(t("brands_kicker")),h2(t("brands_title")),
-        text(t("brands_intro"),{"fontSize":"15px","color":MUTED,"lineHeight":"1.6","maxWidth":"620px","width":"auto","marginBottom":"6px"})],
+    head=blk("div",children=[kicker(t("brands_kicker")),h2(t("brands_title"),color="#f3ede3"),
+        text(t("brands_intro"),{"fontSize":"15px","color":"#b3a893","lineHeight":"1.6","maxWidth":"620px","width":"auto","marginBottom":"6px"})],
         styles={"display":"flex","flexDirection":"column","alignItems":"center","textAlign":"center","width":"100%","marginBottom":"26px"})
-    return section([head,row],bg=ALT)
+    return section([head,row],bg=NAVY)
 
 def contact_section():
     q="Utenos+g.+16+Kaunas"
@@ -968,15 +964,16 @@ def booking_section():
 
 # ================================================================= NAV CSS
 NAV_CSS = """
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
-html,body{background:#1a140e;}
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+html,body{background:#faf8f3;}
+html{scroll-behavior:smooth;}
 body,input,button,textarea,select{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
-::selection{background:#c4803a;color:#1a140e;}
+::selection{background:#b3873c;color:#ffffff;}
 a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none !important; }
 .bl-menu{opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .18s ease,transform .18s ease,visibility .18s ease;pointer-events:none;}
 .bl-navitem:hover .bl-menu{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;}
 .bl-menu-link{transition:background .12s ease,color .12s ease;}
-.bl-menu-link:hover{background:#2c2318;color:#c4803a;}
+.bl-menu-link:hover{background:#f3eee2;color:#b3873c;}
 .bl-promo:hover{opacity:.9;}
 .bl-brand{transition:opacity .15s ease;opacity:.7;}
 .bl-brand:hover{opacity:1;}
@@ -985,31 +982,40 @@ a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none !import
 .bl-faq-plus{transition:transform .2s ease;}
 .bl-faq[open] .bl-faq-plus{transform:rotate(45deg);}
 .bl-faq-qt{transition:color .15s ease;}
-.bl-faq:hover .bl-faq-qt{color:#c4803a;}
+.bl-faq:hover .bl-faq-qt{color:#b3873c;}
 .bl-barberpole{background:repeating-linear-gradient(-45deg,#c8102e 0 10px,#f5f5f5 10px 20px,#0a3161 20px 30px,#f5f5f5 30px 40px);}
 .bl-social{transition:background .15s ease,color .15s ease,border-color .15s ease;}
-.bl-social:hover{background:#c4803a;color:#1a140e;border-color:#c4803a;}
-#booking-app select option{background:#241c14;color:#f3ede3;}
+.bl-social:hover{background:#b3873c;color:#ffffff;border-color:#b3873c;}
+#booking-app select option{background:#ffffff;color:#26211a;}
 .bl-timegrid{display:flex;gap:28px;align-items:flex-start;width:100%;}
 .bl-timegrid .bl-cal{flex:0 0 330px;max-width:330px;}
 .bl-timegrid .bl-slots{flex:1 1 auto;min-width:0;}
 @media (max-width:760px){ .bl-timegrid{flex-direction:column;gap:22px;} .bl-timegrid .bl-cal,.bl-timegrid .bl-slots{flex:1 1 auto;max-width:100%;width:100%;} }
-#booking-app select:focus{outline:none;border-color:#c4803a;}
+#booking-app select:focus{outline:none;border-color:#b3873c;}
 .bl-blogcard{transition:transform .15s ease,border-color .15s ease;}
-.bl-blogcard:hover{transform:translateY(-3px);border-color:#c4803a;}
-.bl-blog-content{font-size:16px;line-height:1.8;color:#cfc5b6;}
+.bl-blogcard:hover{transform:translateY(-3px);border-color:#b3873c;box-shadow:0 14px 34px rgba(38,33,26,.10);}
+.bl-blog-content{font-size:16px;line-height:1.8;color:#57503f;}
 .bl-blog-content p{margin:0 0 18px;}
-.bl-blog-content h2{font-family:'Playfair Display',Georgia,serif;color:#f3ede3;font-size:25px;font-weight:600;margin:32px 0 12px;letter-spacing:.005em;}
-.bl-blog-content h3{font-family:'Playfair Display',Georgia,serif;color:#f3ede3;font-size:20px;font-weight:600;margin:26px 0 10px;}
-.bl-blog-content a{color:#c4803a;text-decoration:underline !important;}
+.bl-blog-content h2{font-family:'Cormorant Garamond',Georgia,serif;color:#26211a;font-size:27px;font-weight:600;margin:32px 0 12px;letter-spacing:.005em;}
+.bl-blog-content h3{font-family:'Cormorant Garamond',Georgia,serif;color:#26211a;font-size:21px;font-weight:600;margin:26px 0 10px;}
+.bl-blog-content a{color:#b3873c;text-decoration:underline !important;}
 .bl-blog-content ul,.bl-blog-content ol{margin:0 0 18px;padding-left:22px;}
 .bl-blog-content li{margin-bottom:8px;}
 .bl-blog-content img{max-width:100%;border-radius:12px;margin:18px 0;}
-.bl-blog-content strong,.bl-blog-content b{color:#f3ede3;}
-.bl-navitem>div:first-child:hover{color:#c4803a;}
+.bl-blog-content strong,.bl-blog-content b{color:#26211a;}
+.bl-navitem>div:first-child:hover{color:#b3873c;}
 @media (min-width:577px){ .bl-mobile-menu{display:none !important;} }
-.bl-mobile-menu a:hover{ color:#c4803a; }
-.bl-lang a:hover{ color:#c4803a; }
+.bl-mobile-menu a:hover{ color:#b3873c; }
+.bl-lang a:hover{ color:#b3873c; }
+.bl-anim .bl-reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease;}
+.bl-anim .bl-reveal.bl-inview{opacity:1;transform:translateY(0);}
+@media (prefers-reduced-motion: reduce){.bl-anim .bl-reveal{opacity:1 !important;transform:none !important;transition:none !important;}}
+.bl-lift{transition:transform .25s ease,box-shadow .25s ease;}
+.bl-lift:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(38,33,26,.12);}
+.bl-zoom img{transition:transform .6s ease;}
+.bl-zoom:hover img{transform:scale(1.06);}
+.bl-cta{transition:transform .2s ease,box-shadow .2s ease,opacity .2s ease;}
+.bl-cta:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(179,135,60,.45);}
 img[src*="tile.openstreetmap"]{filter:grayscale(.35) brightness(.82) contrast(1.05);}
 """
 
@@ -1047,10 +1053,10 @@ def eur(p):
 
 barbers = frappe.db.get_all("Barber", filters={"is_active": 1},
     fields=["name","barber_name","bio","photo","phone","email"], order_by="barber_name asc")
-fb=["https://images.unsplash.com/photo-1503443207922-dff7d543fd0e?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&w=600&q=80",
-    "https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=600&q=80"]
+fb=["https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1593702275687-f8b402bf1fb5?auto=format&fit=crop&w=800&q=80"]
 for i,b in enumerate(barbers):
     if not b.get("photo"): b["photo"]=fb[i%%len(fb)]
     b["bio"]=trx(b.get("bio") or "")

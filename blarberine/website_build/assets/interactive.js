@@ -3,8 +3,8 @@
    Shares a basket in localStorage that Phase 3 booking will consume. */
 (function () {
   "use strict";
-  var CORAL="#c4803a", NAVY="#140f0a", INK="#f3ede3", MUTED="#9a8e7c",
-      BORDER="#3a2f22", ALT="#221a12", GREEN="#3fbf7a", CARD="#241c14", DARK="#1a140e";
+  var CORAL="#b3873c", NAVY="#181410", INK="#26211a", MUTED="#8c8271",
+      BORDER="#e6dfd0", ALT="#f1ece2", GREEN="#1f8a4c", CARD="#ffffff", DARK="#faf8f3";
   var API="/api/method/blarberine.blarberine.api.";
   var FONT="'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
   var LANG=/^\/en(\/|$)/.test(location.pathname)?"en":"lt";
@@ -67,7 +67,7 @@
     if(!b.length){ barOpen=false; return; }
     var total=b.reduce(function(s,x){return s+(x.price||0);},0);
     bar=el("div","position:fixed;left:0;right:0;bottom:0;z-index:900;background:"+CARD+";border-top:1px solid "+BORDER+
-      ";box-shadow:0 -6px 24px rgba(0,0,0,.5);font-family:"+FONT+";");
+      ";box-shadow:0 -6px 24px rgba(38,33,26,.14);font-family:"+FONT+";");
     if(barOpen){
       var panel=el("div","max-width:1080px;margin:0 auto;padding:12px 24px 0;");
       b.forEach(function(x){
@@ -90,7 +90,7 @@
     line1.appendChild(el("span","font-family:"+FONT+";font-size:12px;color:"+CORAL+";font-weight:600;",{text:barOpen?L.hide:L.edit}));
     info.appendChild(line1);
     info.appendChild(el("div","font-family:"+FONT+";font-size:12px;color:"+MUTED+";",{text:L.pay}));
-    var go=el("a","font-family:"+FONT+";background:"+CORAL+";color:#1a140e;font-weight:700;font-size:15px;"+
+    var go=el("a","font-family:"+FONT+";background:"+CORAL+";color:#ffffff;font-weight:700;font-size:15px;"+
       "padding:12px 28px;border-radius:8px;text-decoration:none;cursor:pointer;flex-shrink:0;",{text:L.choose,href:BOOK});
     rowWrap.appendChild(info); rowWrap.appendChild(go);
     bar.appendChild(rowWrap);
@@ -103,7 +103,7 @@
       btn.textContent=on?L.selected:L.select;
       btn.style.cssText="font-family:"+FONT+";font-size:14px;font-weight:600;padding:7px 18px;border-radius:8px;"+
         "cursor:pointer;flex-shrink:0;transition:all .12s ease;"+
-        (on?("background:#13291c;color:"+GREEN+";border:1px solid "+GREEN+";")
+        (on?("background:#e9f5ee;color:"+GREEN+";border:1px solid "+GREEN+";")
            :("background:"+CARD+";color:"+CORAL+";border:1px solid "+CORAL+";"));
     }
     var btn=el("button"); paint(btn);
@@ -140,7 +140,7 @@
         var on=(label===active);
         var chip=el("button","font-family:"+FONT+";font-size:14px;font-weight:600;padding:9px 18px;border-radius:999px;"+
           "cursor:pointer;transition:all .12s ease;"+
-          (on?("background:"+CORAL+";color:#1a140e;border:1px solid "+CORAL+";")
+          (on?("background:"+CORAL+";color:#ffffff;border:1px solid "+CORAL+";")
              :("background:"+CARD+";color:"+INK+";border:1px solid "+BORDER+";")),
           {text:label,on:{click:function(){ active=label; drawChips(); drawList(); }}});
         chipRow.appendChild(chip);
@@ -242,12 +242,12 @@
   function showCookieBanner(){
     if(document.getElementById("bl-cookie")) return;
     var box=el("div","position:fixed;left:20px;bottom:20px;z-index:1000;max-width:410px;width:calc(100% - 40px);"+
-      "background:"+CARD+";border:1px solid "+BORDER+";border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.55);padding:20px 22px;");
+      "background:"+CARD+";border:1px solid "+BORDER+";border-radius:14px;box-shadow:0 14px 44px rgba(38,33,26,.16);padding:20px 22px;");
     box.id="bl-cookie";
     box.appendChild(el("div","font-family:"+FONT+";font-size:15px;font-weight:700;color:"+INK+";margin-bottom:8px;",{text:L.ckTitle}));
     box.appendChild(el("div","font-family:"+FONT+";font-size:13px;color:"+MUTED+";line-height:1.55;margin-bottom:16px;",{text:L.ckText}));
     var btns=el("div","display:flex;gap:10px;flex-wrap:wrap;");
-    btns.appendChild(el("button","font-family:"+FONT+";flex:1;min-width:130px;background:"+CORAL+";color:#1a140e;font-weight:700;font-size:14px;padding:11px 16px;border:none;border-radius:8px;cursor:pointer;",
+    btns.appendChild(el("button","font-family:"+FONT+";flex:1;min-width:130px;background:"+CORAL+";color:#ffffff;font-weight:700;font-size:14px;padding:11px 16px;border:none;border-radius:8px;cursor:pointer;",
       {text:L.ckAll,on:{click:function(){ ckSet("all"); box.remove(); loadAnalytics(); }}}));
     btns.appendChild(el("button","font-family:"+FONT+";flex:1;min-width:130px;background:"+CARD+";color:"+INK+";font-weight:600;font-size:14px;padding:11px 16px;border:1px solid "+BORDER+";border-radius:8px;cursor:pointer;",
       {text:L.ckEss,on:{click:function(){ ckSet("essential"); box.remove(); }}}));
@@ -261,7 +261,25 @@
     showCookieBanner();
   }
 
+  // ---- scroll-reveal animations ----
+  // Sections carry .bl-reveal from the generator. The fade/slide styles only
+  // apply under body.bl-anim, which is added HERE — if JS ever fails, the
+  // page stays fully visible. prefers-reduced-motion is handled in CSS.
+  function initReveal(){
+    try{
+      if(!("IntersectionObserver" in window)) return;
+      document.body.classList.add("bl-anim");
+      var io=new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if(en.isIntersecting){ en.target.classList.add("bl-inview"); io.unobserve(en.target); }
+        });
+      },{threshold:0.12,rootMargin:"0px 0px -40px 0px"});
+      document.querySelectorAll(".bl-reveal").forEach(function(n){ io.observe(n); });
+    }catch(e){}
+  }
+
   ready(function(){
+    initReveal();
     initConsent();
     wireMobileMenu();
     var sApp=document.getElementById("services-app");
