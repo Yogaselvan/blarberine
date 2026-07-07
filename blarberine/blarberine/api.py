@@ -403,6 +403,29 @@ def get_week_availability(services, start_date, barber=None):
 
 
 @frappe.whitelist(allow_guest=True)
+def get_month_availability(services, month_start, barber=None):
+    """Free-slot count for every day of the month containing `month_start`.
+
+    Powers the calendar grid on the time-selection step: past days and
+    fully-booked days come back with count 0 (rendered greyed/unclickable),
+    days with capacity come back with their remaining slot count.
+    """
+    services = frappe.parse_json(services) if isinstance(services, str) else services
+    first = frappe.utils.getdate(month_start).replace(day=1)
+    if first.month == 12:
+        nxt = first.replace(year=first.year + 1, month=1)
+    else:
+        nxt = first.replace(month=first.month + 1)
+    out = []
+    d = first
+    while d < nxt:
+        res = get_basket_slots(services, d, barber)
+        out.append({"date": str(d), "count": len(res["slots"])})
+        d = frappe.utils.add_days(d, 1)
+    return out
+
+
+@frappe.whitelist(allow_guest=True)
 def create_basket_booking(customer_name, services, date, start_time, phone=None, email=None, barber=None):
     """Create back-to-back Appointments for a basket of services. Picks a
     qualified barber for `any`. Re-validates availability server-side."""

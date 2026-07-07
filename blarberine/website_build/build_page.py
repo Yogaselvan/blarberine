@@ -874,8 +874,8 @@ def booking_section():
         styles={"display":"flex","flexDirection":"column","alignItems":"center","width":"100%"})
     app=blk("div",attributes={"id":"booking-app"},innerHTML='<p style="font-family:'+FONT+';color:'+MUTED+';text-align:center">'+t("loading_booking")+'</p>',
         styles={"display":"flex","flexDirection":"column","width":"100%"})
-    card=blk("div",children=[head,app],styles={"display":"flex","flexDirection":"column","alignItems":"center","width":"100%","maxWidth":"720px",
-        "backgroundColor":CARD,"border":"1px solid "+BORDER,"borderRadius":"16px","paddingTop":"40px","paddingBottom":"40px","paddingLeft":"32px","paddingRight":"32px"},
+    card=blk("div",children=[head,app],styles={"display":"flex","flexDirection":"column","alignItems":"center","width":"100%","maxWidth":"960px",
+        "backgroundColor":CARD,"border":"1px solid "+BORDER,"borderRadius":"16px","paddingTop":"40px","paddingBottom":"40px","paddingLeft":"36px","paddingRight":"36px"},
         mobileStyles={"paddingTop":"28px","paddingBottom":"28px","paddingLeft":"16px","paddingRight":"16px","borderRadius":"14px"})
     return blk("section",children=[card],attributes={"id":"booking"},name="booking",styles={"display":"flex","flexDirection":"column","alignItems":"center","width":"100%","flexShrink":0,
         "backgroundColor":ALT,"paddingTop":"56px","paddingBottom":"56px","paddingLeft":"24px","paddingRight":"24px"},
@@ -905,6 +905,11 @@ a, a:link, a:visited, a:hover, a:focus, a:active { text-decoration: none !import
 .bl-social{transition:background .15s ease,color .15s ease,border-color .15s ease;}
 .bl-social:hover{background:#d4af37;color:#0d0d0d;border-color:#d4af37;}
 #booking-app select option{background:#1a1a1a;color:#f2ede4;}
+.bl-timegrid{display:flex;gap:28px;align-items:flex-start;width:100%;}
+.bl-timegrid .bl-cal{flex:0 0 330px;max-width:330px;}
+.bl-timegrid .bl-slots{flex:1 1 auto;min-width:0;}
+@media (max-width:760px){ .bl-timegrid{flex-direction:column;gap:22px;} .bl-timegrid .bl-cal,.bl-timegrid .bl-slots{flex:1 1 auto;max-width:100%;width:100%;} }
+#booking-app select:focus{outline:none;border-color:#d4af37;}
 .bl-blogcard{transition:transform .15s ease,border-color .15s ease;}
 .bl-blogcard:hover{transform:translateY(-3px);border-color:#d4af37;}
 .bl-blog-content{font-size:16px;line-height:1.8;color:#c9c3b8;}

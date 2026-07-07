@@ -14,12 +14,17 @@
     lt:["saus.","vas.","kov.","bal.","geg.","birž.","liep.","rugp.","rugs.","spal.","lapkr.","gruod."]};
   var DOW_ALL={en:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],lt:["Sk","Pr","An","Tr","Kt","Pn","Št"]};
   var MONTHS=MONTHS_ALL[LANG]||MONTHS_ALL.lt, DOW=DOW_ALL[LANG]||DOW_ALL.lt;
+  // Monday-first column labels (European calendars) + full weekday names, indexed by getDay() 0=Sun
+  var DOW_MON={en:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],lt:["Pr","An","Tr","Kt","Pn","Št","Sk"]};
+  var DOW_FULL={en:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    lt:["Sekmadienis","Pirmadienis","Antradienis","Trečiadienis","Ketvirtadienis","Penktadienis","Šeštadienis"]};
   var I18N={
    en:{back:"← Back",all:"All",add:"+ Add",added:"✓ Added",yourAppt:"Your appointment",
     basketSubHas:"Add treatments, then choose a time — pay at the venue.",basketSubEmpty:"Pick your treatments to get started.",
     totalPay:"Total · pay at venue",hideTreat:"− Hide treatments",addAnother:"+ Add another treatment",addTreat:"+ Add treatment",
     choose:"Choose time",selectTime:"Select time",anyPro:"Any professional",loadingAvail:"Loading availability…",
     fullyBooked:"Fully booked",nextAvail:"Next availability on",goTo:"Go to",finding:"Finding times…",noTimes:"No times left this day.",
+    noneThisMonth:"No availability this month — try the next one ›",pickDate:"Pick a date to see available times.",
     checkout:"Checkout",checkoutSub:"Pay at the venue — no card needed to book.",withw:"With ",firstAvail:"first available professional",
     payVenue:"Pay at venue",fullName:"Full name",email:"Email (optional)",phone:"Phone",guest:"Check out as guest",payment:"Payment",
     cancelNote:"You won't be charged now — you'll pay at the venue after your appointment. If you cancel less than 24 hours before or don't show up, the venue may charge you.",
@@ -36,6 +41,7 @@
     totalPay:"Iš viso · atsiskaitoma vietoje",hideTreat:"− Slėpti paslaugas",addAnother:"+ Pridėti dar paslaugą",addTreat:"+ Pridėti paslaugą",
     choose:"Pasirinkti laiką",selectTime:"Pasirinkite laiką",anyPro:"Bet kuris meistras",loadingAvail:"Kraunamas laisvas laikas…",
     fullyBooked:"Viskas užimta",nextAvail:"Artimiausias laisvas laikas:",goTo:"Eiti į",finding:"Ieškoma laikų…",noTimes:"Šią dieną laisvų laikų nėra.",
+    noneThisMonth:"Šį mėnesį laisvų laikų nėra — pabandykite kitą ›",pickDate:"Pasirinkite dieną, kad matytumėte laisvus laikus.",
     checkout:"Rezervacija",checkoutSub:"Atsiskaitoma vietoje — rezervuojant kortelės nereikia.",withw:"Su ",firstAvail:"pirmu laisvu meistru",
     payVenue:"Atsiskaitymas vietoje",fullName:"Vardas ir pavardė",email:"El. paštas (nebūtina)",phone:"Telefonas",guest:"Užsakymas be paskyros",payment:"Apmokėjimas",
     cancelNote:"Dabar nebūsite apmokestinti — sumokėsite vietoje po vizito. Jei atšauksite likus mažiau nei 24 val. arba neatvyksite, kirpykla gali pritaikyti mokestį.",
@@ -159,79 +165,106 @@
       }
     }
 
-    // ---------- TIME ----------
+    // ---------- TIME (Treatwell-style: month calendar + time list) ----------
+    function startOfMonth(d){ return new Date(d.getFullYear(),d.getMonth(),1); }
+    function firstAvail(map){ var ks=Object.keys(map||{}).filter(function(k){return map[k]>0;}).sort(); return ks[0]||null; }
+
     function renderTime(){
       root.appendChild(h(L.selectTime));
-      // professional dropdown
-      var sel=el("select","font-family:"+FONT+";font-size:15px;padding:12px 14px;border:1px solid "+BORDER+";border-radius:8px;width:100%;max-width:420px;color:"+INK+";background:"+CARD+";margin:0 auto 20px;display:block;cursor:pointer;");
-      sel.appendChild(el("option","",{value:"",text:L.anyPro}));
-      DATA.barbers.forEach(function(bb){ var o=el("option","",{value:bb.name,text:bb.barber_name}); if(bb.name===state.pro)o.setAttribute("selected","selected"); sel.appendChild(o); });
-      sel.value=state.pro;
-      sel.addEventListener("change",function(){ state.pro=sel.value; state.date=null; state.slot=null; drawWeek(); });
-      root.appendChild(sel);
 
-      var card=el("div","border:1px solid "+BORDER+";border-radius:14px;padding:16px;max-width:560px;margin:0 auto;");
-      root.appendChild(card);
-      var slotsBox=el("div","margin-top:8px;");
-      function drawWeek(){
-        clear(card);
-        var head=el("div","display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;");
-        var atStart=iso(state.weekStart)<=iso(new Date());
-        var prev=el("button","background:"+CARD+";border:1px solid "+BORDER+";border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;color:"+INK+";"+(atStart?"opacity:.3;cursor:default;":""),{html:"‹"});
-        if(!atStart) prev.addEventListener("click",function(){ state.weekStart=addDays(state.weekStart,-7); state.date=null; drawWeek(); });
-        var next=el("button","background:"+CARD+";border:1px solid "+BORDER+";border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;color:"+INK+";",{html:"›",on:{click:function(){ state.weekStart=addDays(state.weekStart,7); state.date=null; drawWeek(); }}});
-        head.appendChild(prev);
-        head.appendChild(el("div","font-family:"+FONT+";font-size:15px;font-weight:700;color:"+INK+";",{text:MONTHS[state.weekStart.getMonth()]+" "+state.weekStart.getFullYear()}));
-        head.appendChild(next);
-        card.appendChild(head);
-        var grid=el("div","display:grid;grid-template-columns:repeat(7,1fr);gap:6px;");
-        card.appendChild(grid);
-        clear(slotsBox); card.appendChild(slotsBox);
-        slotsBox.appendChild(el("p","font-family:"+FONT+";text-align:center;color:"+MUTED+";font-size:14px;margin:16px 0;",{text:L.loadingAvail}));
-        get(API+"get_week_availability?"+q({services:JSON.stringify(names()),start_date:iso(state.weekStart),barber:state.pro})).then(function(week){
-          clear(grid);
-          if(!state.date){ var f=week.filter(function(d){return d.count>0;})[0]; if(f) state.date=f.date; }
-          week.forEach(function(d){
-            var dt=parseISO(d.date), on=state.date===d.date, avail=d.count>0;
-            var cell=el("div","display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;border-radius:10px;"+(avail?"cursor:pointer;":"")+(on?("background:"+CORAL+";"):""));
-            cell.appendChild(el("div","font-family:"+FONT+";font-size:11px;color:"+(on?"#0d0d0d":MUTED)+";",{text:DOW[dt.getDay()]}));
-            cell.appendChild(el("div","font-family:"+FONT+";font-size:16px;font-weight:700;color:"+(on?"#0d0d0d":(avail?INK:"#5a564d"))+";"+(avail?"":"text-decoration:line-through;"),{text:("0"+dt.getDate()).slice(-2)}));
-            if(avail) cell.addEventListener("click",function(){ state.date=d.date; state.slot=null; drawWeek(); });
-            grid.appendChild(cell);
-          });
-          drawSlots(week);
+      // professional selector — full width, centred
+      var selWrap=el("div","width:100%;max-width:460px;margin:0 auto 24px;");
+      var sel=el("select","font-family:"+FONT+";font-size:15px;padding:13px 16px;border:1px solid "+BORDER+";border-radius:10px;width:100%;color:"+INK+";background:"+CARD+";display:block;cursor:pointer;");
+      sel.appendChild(el("option","",{value:"",text:L.anyPro}));
+      DATA.barbers.forEach(function(bb){ sel.appendChild(el("option","",{value:bb.name,text:bb.barber_name})); });
+      sel.value=state.pro;
+      sel.addEventListener("change",function(){ state.pro=sel.value; state.date=null; state.slot=null; loadMonth(); });
+      selWrap.appendChild(sel); root.appendChild(selWrap);
+
+      // two panels: calendar (left) + times (right); stack on mobile via .bl-timegrid
+      var layout=el("div"); layout.className="bl-timegrid";
+      var calPanel=el("div","border:1px solid "+BORDER+";border-radius:14px;padding:18px;"); calPanel.className="bl-cal";
+      var slotPanel=el("div",""); slotPanel.className="bl-slots";
+      layout.appendChild(calPanel); layout.appendChild(slotPanel);
+      root.appendChild(layout);
+
+      var monthCursor=startOfMonth(state.date?parseISO(state.date):new Date());
+      var monthData=null;
+
+      function loadMonth(){
+        clear(calPanel); clear(slotPanel);
+        calPanel.appendChild(el("p","font-family:"+FONT+";text-align:center;color:"+MUTED+";font-size:14px;padding:40px 0;",{text:L.loadingAvail}));
+        get(API+"get_month_availability?"+q({services:JSON.stringify(names()),month_start:iso(monthCursor),barber:state.pro})).then(function(days){
+          monthData={}; days.forEach(function(x){ monthData[x.date]=x.count; });
+          var inMonth=state.date&&parseISO(state.date).getMonth()===monthCursor.getMonth()&&parseISO(state.date).getFullYear()===monthCursor.getFullYear();
+          if(!inMonth||(monthData[state.date]||0)===0) state.date=firstAvail(monthData);
+          drawCalendar(); drawSlots();
         });
       }
-      function drawSlots(week){
-        clear(slotsBox);
-        var cur=week.filter(function(d){return d.date===state.date;})[0];
-        if(!state.date||!cur||cur.count===0){
-          var nextAv=week.filter(function(d){return d.count>0;})[0];
-          slotsBox.appendChild(el("div","font-family:"+FONT+";text-align:center;color:"+INK+";font-weight:700;margin:18px 0 6px;",{text:L.fullyBooked}));
-          if(nextAv){ var dt2=parseISO(nextAv.date);
-            slotsBox.appendChild(el("div","font-family:"+FONT+";text-align:center;color:"+MUTED+";font-size:14px;margin-bottom:10px;",{text:L.nextAvail+" "+DOW[dt2.getDay()]+" "+dt2.getDate()+" "+MONTHS[dt2.getMonth()]}));
-            var gowrap=el("div","text-align:center;");
-            gowrap.appendChild(el("button","font-family:"+FONT+";background:"+CARD+";border:1px solid "+CORAL+";color:"+INK+";font-weight:600;padding:8px 18px;border-radius:8px;cursor:pointer;",{text:L.goTo+" "+dt2.getDate()+" "+MONTHS[dt2.getMonth()],on:{click:function(){ state.date=nextAv.date; state.weekStart=parseISO(nextAv.date); drawWeek(); }}}));
-            slotsBox.appendChild(gowrap);
-          }
+
+      function drawCalendar(){
+        clear(calPanel);
+        var now=new Date();
+        var atMin=monthCursor.getFullYear()<now.getFullYear()||(monthCursor.getFullYear()===now.getFullYear()&&monthCursor.getMonth()<=now.getMonth());
+        var head=el("div","display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;");
+        var prev=el("button","background:"+CARD+";border:1px solid "+BORDER+";border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:18px;color:"+INK+";"+(atMin?"opacity:.3;cursor:default;":""),{html:"‹"});
+        if(!atMin) prev.addEventListener("click",function(){ monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()-1,1); loadMonth(); });
+        var next=el("button","background:"+CARD+";border:1px solid "+BORDER+";border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:18px;color:"+INK+";",{html:"›",on:{click:function(){ monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()+1,1); loadMonth(); }}});
+        head.appendChild(prev);
+        head.appendChild(el("div","font-family:"+FONT+";font-size:16px;font-weight:700;color:"+INK+";text-transform:capitalize;",{text:MONTHS[monthCursor.getMonth()]+" "+monthCursor.getFullYear()}));
+        head.appendChild(next);
+        calPanel.appendChild(head);
+
+        var wl=el("div","display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:7px;");
+        (DOW_MON[LANG]||DOW_MON.lt).forEach(function(d){ wl.appendChild(el("div","font-family:"+FONT+";font-size:11px;color:"+MUTED+";text-align:center;font-weight:600;letter-spacing:.04em;",{text:d})); });
+        calPanel.appendChild(wl);
+
+        var grid=el("div","display:grid;grid-template-columns:repeat(7,1fr);gap:5px;");
+        var startCol=(monthCursor.getDay()+6)%7;   // Monday-first offset
+        for(var i=0;i<startCol;i++) grid.appendChild(el("div",""));
+        var dim=new Date(monthCursor.getFullYear(),monthCursor.getMonth()+1,0).getDate();
+        var todayI=iso(now);
+        for(var day=1;day<=dim;day++){
+          (function(dnum){
+            var di=iso(new Date(monthCursor.getFullYear(),monthCursor.getMonth(),dnum));
+            var count=(monthData&&monthData[di])||0, past=di<todayI, avail=count>0&&!past, on=state.date===di, isToday=di===todayI;
+            var st="display:flex;align-items:center;justify-content:center;height:40px;border-radius:10px;font-family:"+FONT+";font-size:14px;font-weight:600;"+
+              (on?("background:"+CORAL+";color:#0d0d0d;"):(avail?("color:"+INK+";background:"+CARD+";cursor:pointer;"):("color:#4a473f;")))+
+              (isToday&&!on?("box-shadow:inset 0 0 0 1px "+CORAL+";"):"");
+            var cell=el("div",st,{text:(""+dnum)});
+            if(avail&&!on) cell.addEventListener("click",function(){ state.date=di; state.slot=null; drawCalendar(); drawSlots(); });
+            grid.appendChild(cell);
+          })(day);
+        }
+        calPanel.appendChild(grid);
+      }
+
+      function drawSlots(){
+        clear(slotPanel);
+        if(!state.date){
+          slotPanel.appendChild(el("div","font-family:"+FONT+";text-align:center;color:"+MUTED+";font-size:14px;padding:48px 16px;line-height:1.6;",{text:L.noneThisMonth}));
           return;
         }
-        slotsBox.appendChild(el("p","font-family:"+FONT+";text-align:center;color:"+MUTED+";font-size:13px;margin:12px 0;",{text:L.finding}));
+        var dt=parseISO(state.date);
+        slotPanel.appendChild(el("div","font-family:"+FONT+";font-size:15px;font-weight:700;color:"+INK+";margin-bottom:14px;text-transform:capitalize;",{text:(DOW_FULL[LANG]||DOW_FULL.lt)[dt.getDay()]+", "+dt.getDate()+" "+MONTHS[dt.getMonth()]}));
+        var box=el("div","max-height:360px;overflow-y:auto;"); slotPanel.appendChild(box);
+        box.appendChild(el("p","font-family:"+FONT+";text-align:center;color:"+MUTED+";font-size:13px;padding:16px 0;",{text:L.finding}));
         get(API+"get_basket_slots?"+q({services:JSON.stringify(names()),date:state.date,barber:state.pro})).then(function(res){
-          clear(slotsBox);
+          clear(box);
           var slots=(res&&res.slots)||[];
-          if(!slots.length){ slotsBox.appendChild(el("p","font-family:"+FONT+";text-align:center;color:"+MUTED+";",{text:L.noTimes})); return; }
-          var grid=el("div","display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-top:8px;");
+          if(!slots.length){ box.appendChild(el("p","font-family:"+FONT+";text-align:center;color:"+MUTED+";padding:24px 0;",{text:L.noTimes})); return; }
+          var grid=el("div","display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:10px;");
           slots.forEach(function(s){
-            grid.appendChild(el("button","font-family:"+FONT+";font-size:15px;font-weight:600;color:"+INK+";background:"+CARD+";border:1px solid "+BORDER+";border-radius:8px;padding:10px 0;cursor:pointer;",
+            grid.appendChild(el("button","font-family:"+FONT+";font-size:15px;font-weight:600;color:"+INK+";background:"+CARD+";border:1px solid "+BORDER+";border-radius:9px;padding:11px 0;cursor:pointer;transition:border-color .12s,color .12s;",
               {text:s.time,on:{click:function(){ state.slot=s; state.step="checkout"; render(); },
-                mouseover:function(e){e.target.style.borderColor=CORAL;e.target.style.color=CORAL;},
-                mouseout:function(e){e.target.style.borderColor=BORDER;e.target.style.color=INK;}}}));
+                mouseover:function(e){e.currentTarget.style.borderColor=CORAL;e.currentTarget.style.color=CORAL;},
+                mouseout:function(e){e.currentTarget.style.borderColor=BORDER;e.currentTarget.style.color=INK;}}}));
           });
-          slotsBox.appendChild(grid);
+          box.appendChild(grid);
         });
       }
-      drawWeek();
+
+      loadMonth();
       root.appendChild(back("basket"));
     }
 
@@ -327,6 +360,10 @@
 
     function render(){
       clear(root);
+      // the time step uses the full widened card (two panels); the rest read
+      // better as a single centred column
+      root.style.marginLeft="auto"; root.style.marginRight="auto";
+      root.style.maxWidth=(state.step==="time")?"none":"600px";
       if(state.step==="basket") renderBasket();
       else if(state.step==="time") renderTime();
       else if(state.step==="checkout") renderCheckout();
