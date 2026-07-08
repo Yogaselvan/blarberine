@@ -577,12 +577,14 @@ def works_gallery():
             styles={"display":"flex","flexDirection":"column"})],
         styles={"display":"flex","flexDirection":"row","justifyContent":"space-between","alignItems":"flex-end",
                 "width":"100%","marginBottom":"28px"})
-    cells=[]
-    for src in [GALLERY[0],WORK[1],GALLERY[1],WORK[4],WORK[3],GALLERY[2]]:
-        ph=img(src,{"width":"100%","height":"250px","objectFit":"cover","display":"block"})
-        cells.append(blk("div",children=[ph],classes=["bl-zoom"],
-            styles={"borderRadius":"14px","overflow":"hidden","width":"100%"}))
-    grid=blk("div",children=cells,styles={"display":"grid","gridTemplateColumns":"repeat(3, 1fr)","gap":"22px","width":"100%"},
+    # manager-editable gallery: repeats over data.gallery_images (Gallery Image
+    # DocType at /app/gallery-image); the data script falls back to built-in
+    # placeholder photos when none are uploaded.
+    ph=img(GALLERY[0],{"width":"100%","height":"250px","objectFit":"cover","display":"block"},key="image")
+    cell=blk("div",children=[ph],classes=["bl-zoom"],
+        styles={"borderRadius":"14px","overflow":"hidden","width":"100%"})
+    grid=blk("div",children=[cell],isRepeater=True,dataKey={"key":"gallery_images","comesFrom":"dataScript"},
+        styles={"display":"grid","gridTemplateColumns":"repeat(3, 1fr)","gap":"22px","width":"100%"},
         mobileStyles={"gridTemplateColumns":"1fr","gap":"14px"})
     return section([head,grid],bg=LBG)
 
@@ -1130,6 +1132,14 @@ data.review_breakdown=brk
     # loop var must NOT start with "_" — RestrictedPython forbids that)
     script += ('\nfor nb in data.barbers:\n'
                '    nb["href"] = ' + repr(R_TEAM) + ' + "?pro=" + nb["name"].replace(" ", "%20")\n')
+    # gallery: manager-uploaded Gallery Image docs, else built-in placeholders
+    gfallback = [GALLERY[0], WORK[1], GALLERY[1], WORK[4], WORK[3], GALLERY[2]]
+    gfb_literal = "[" + ",".join(repr(u) for u in gfallback) + "]"
+    script += ('\ngimgs = frappe.db.get_all("Gallery Image", fields=["image"], order_by="display_order asc, creation asc")\n'
+               'gimgs = [{"image": gi["image"]} for gi in gimgs if gi.get("image")]\n'
+               'if not gimgs:\n'
+               '    gimgs = [{"image": gu} for gu in ' + gfb_literal + ']\n'
+               'data.gallery_images = gimgs\n')
     return script
 
 PAGES={"home":home,"services":services_page,"team":team_page,"blog":blog_list}

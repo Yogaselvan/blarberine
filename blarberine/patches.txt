@@ -13,3 +13,5 @@ blarberine.patches.rebuild_pages_v4
 blarberine.patches.rebuild_pages_v5
 blarberine.patches.rebuild_pages_v6
 blarberine.patches.rebuild_pages_v7
+blarberine.patches.seed_translations_v1
+blarberine.patches.rebuild_pages_v8
