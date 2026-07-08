@@ -34,7 +34,8 @@ HEAD="'Cormorant Garamond', 'Playfair Display', Georgia, serif"
 # High-quality, verified barbershop photography (all return 200 at these
 # widths). Placeholders until Mantas supplies the shop's own photos.
 _U="https://images.unsplash.com/photo-%s?auto=format&fit=crop&w=%d&q=80"
-HERO_IMG=_U % ("1585747860715-2ba37e788b70", 2100)   # warm premium interior
+# owner-supplied hero photo (1920x950, shipped in-app 2026-07-08)
+HERO_IMG="/assets/blarberine/images/hero-banner.jpg"
 GALLERY=[
  _U % ("1503951914875-452162b0f3f1", 1400),   # hot-towel shave
  _U % ("1622286342621-4bd786c2447c", 1400),   # cut in progress
@@ -449,12 +450,28 @@ def nav(active="home"):
         styles={"display":"none","position":"absolute","top":"100%","left":"0","right":"0","width":"100%","flexDirection":"column",
             "backgroundColor":CARD,"borderBottom":"1px solid "+BORDER,"boxShadow":"0 14px 34px rgba(38,33,26,0.14)",
             "paddingLeft":"20px","paddingRight":"20px","paddingBottom":"10px","zIndex":"55"})
-    return blk("header",children=[row,mobile_menu],name="nav",classes=["bl-nav"],styles={
+    # slim location/hours strip ABOVE the navbar (owner 2026-07-08 — replaces
+    # the info bar that sat under the hero)
+    def _titem(icon,label):
+        return blk("div",children=[text(icon,{"fontSize":"12px","color":CORAL}),
+            text(label,{"fontSize":"12.5px","color":BODY,"fontWeight":"500"})],
+            styles={"display":"flex","flexDirection":"row","alignItems":"center","gap":"6px"})
+    _tstrip_row=blk("div",children=[_titem("📍",t("address_line")),_titem("🕑",t("open_today"))],
+        styles={"display":"flex","flexDirection":"row","alignItems":"center","gap":"26px","width":"100%",
+            "maxWidth":"1180px","flexWrap":"wrap"},mobileStyles={"gap":"10px"})
+    top_strip=blk("div",classes=["bl-topstrip"],children=[_tstrip_row],styles={
+        "display":"flex","flexDirection":"row","justifyContent":"center","width":"100%","flexShrink":0,
+        "backgroundColor":ALT,"borderBottom":"1px solid "+BORDER,"paddingTop":"7px","paddingBottom":"7px",
+        "paddingLeft":"24px","paddingRight":"24px"},mobileStyles={"paddingLeft":"16px","paddingRight":"16px"})
+    navrow=blk("div",children=[row,mobile_menu],styles={
         "display":"flex","flexDirection":"row","justifyContent":"center","alignItems":"center","width":"100%",
-        "flexShrink":0,"position":"sticky","top":"0","zIndex":"50","paddingTop":"14px","paddingBottom":"14px",
+        "position":"relative","paddingTop":"14px","paddingBottom":"14px",
         "paddingLeft":"24px","paddingRight":"24px","backgroundColor":"rgba(250,248,243,0.92)",
         "backdropFilter":"blur(10px)","borderBottom":"1px solid "+BORDER},
         mobileStyles={"paddingLeft":"16px","paddingRight":"16px"})
+    return blk("header",children=[top_strip,navrow],name="nav",classes=["bl-nav"],styles={
+        "display":"flex","flexDirection":"column","alignItems":"center","width":"100%",
+        "flexShrink":0,"position":"sticky","top":"0","zIndex":"50"})
 
 # ================================================================= FOOTER
 # ---- Social links (both CONFIRMED by Mantas 2026-07-06) ----
@@ -652,7 +669,9 @@ def home():
     # dark brands strip -> cream FAQ -> dark contact + footer. before_after
     # dropped (placeholder stock pairs; works_gallery covers it until Mantas
     # sends real photos).
-    return _body([nav("home"),hero(),info_bar(),booking_section(),works_gallery(),prices_strip(),team,
+    # info_bar moved into the header top strip; prices_strip removed from home
+    # (owner 2026-07-08) — full price list stays inside the booking widget.
+    return _body([nav("home"),hero(),booking_section(),works_gallery(),team,
                   brands_strip(),faq_section(),contact_section(),footer()])
 
 def services_page():

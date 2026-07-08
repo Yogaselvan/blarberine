@@ -102,7 +102,9 @@
     // ---------- BASKET ----------
     function servicePicker(){
       var wrap=el("div","border:1px solid "+BORDER+";border-radius:12px;padding:16px;margin-top:12px;");
-      var active=L.all;
+      // remember the chosen category across re-renders (clicking "+ Add"
+      // re-renders the whole screen — without this it snapped back to "All")
+      var active=state.svcCat||L.all;
       var chips=el("div","display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;");
       var list=el("div","");
       function drawChips(){ clear(chips);
@@ -110,7 +112,7 @@
           var on=l===active;
           chips.appendChild(el("button","font-family:"+FONT+";font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;cursor:pointer;"+
             (on?("background:"+CORAL+";color:#ffffff;border:1px solid "+CORAL+";"):("background:"+CARD+";color:"+INK+";border:1px solid "+BORDER+";")),
-            {text:l,on:{click:function(){active=l;drawChips();drawList();}}}));
+            {text:l,on:{click:function(){active=l;state.svcCat=l;drawChips();drawList();}}}));
         });
       }
       function drawList(){ clear(list);
