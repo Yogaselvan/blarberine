@@ -177,6 +177,7 @@
       var monthCursor=startOfMonth(state.date?parseISO(state.date):new Date());
       var monthData=null;
 
+      var autoHops=3;   // auto-skip up to 3 empty months to the first one with times
       function loadMonth(){
         clear(calPanel); clear(slotPanel);
         calPanel.appendChild(el("p","font-family:"+FONT+";text-align:center;color:"+MUTED+";font-size:14px;padding:40px 0;",{text:L.loadingAvail}));
@@ -184,6 +185,12 @@
           monthData={}; days.forEach(function(x){ monthData[x.date]=x.count; });
           var inMonth=state.date&&parseISO(state.date).getMonth()===monthCursor.getMonth()&&parseISO(state.date).getFullYear()===monthCursor.getFullYear();
           if(!inMonth||(monthData[state.date]||0)===0) state.date=firstAvail(monthData);
+          // month fully booked / unscheduled? hop to the next month that has
+          // availability (unless the user is browsing months manually)
+          if(!state.date&&autoHops>0&&names().length){
+            autoHops--; monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()+1,1);
+            loadMonth(); return;
+          }
           drawCalendar(); drawSlots();
         });
       }
@@ -194,8 +201,8 @@
         var atMin=monthCursor.getFullYear()<now.getFullYear()||(monthCursor.getFullYear()===now.getFullYear()&&monthCursor.getMonth()<=now.getMonth());
         var head=el("div","display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;");
         var prev=el("button","background:"+CARD+";border:1px solid "+BORDER+";border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:18px;color:"+INK+";"+(atMin?"opacity:.3;cursor:default;":""),{html:"‹"});
-        if(!atMin) prev.addEventListener("click",function(){ monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()-1,1); loadMonth(); });
-        var next=el("button","background:"+CARD+";border:1px solid "+BORDER+";border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:18px;color:"+INK+";",{html:"›",on:{click:function(){ monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()+1,1); loadMonth(); }}});
+        if(!atMin) prev.addEventListener("click",function(){ autoHops=0; monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()-1,1); loadMonth(); });
+        var next=el("button","background:"+CARD+";border:1px solid "+BORDER+";border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:18px;color:"+INK+";",{html:"›",on:{click:function(){ autoHops=0; monthCursor=new Date(monthCursor.getFullYear(),monthCursor.getMonth()+1,1); loadMonth(); }}});
         head.appendChild(prev);
         head.appendChild(el("div","font-family:"+FONT+";font-size:16px;font-weight:700;color:"+INK+";text-transform:capitalize;",{text:MONTHS[monthCursor.getMonth()]+" "+monthCursor.getFullYear()}));
         head.appendChild(next);
@@ -330,6 +337,10 @@
     }
 
     function render(){
+      // never render time/checkout with an empty selection (stale link or a
+      // just-completed booking) — an empty services list has no availability
+      // by definition and reads as a bogus "no availability this month"
+      if((state.step==="time"||state.step==="checkout")&&!loadBasket().length) state.step="basket";
       clear(root);
       // the time step uses the full widened card (two panels); the rest read
       // better as a single centred column
