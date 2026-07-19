@@ -71,7 +71,10 @@
   function eur(v){ v=v||0; return (v===Math.round(v))?("€"+Math.round(v)):("€"+v.toFixed(2)); }
 
   function loadBasket(){ try{ return JSON.parse(localStorage.getItem("bl_basket"))||[]; }catch(e){ return []; } }
-  function saveBasket(b){ try{ localStorage.setItem("bl_basket",JSON.stringify(b)); }catch(e){} }
+  function saveBasket(b){ try{ localStorage.setItem("bl_basket",JSON.stringify(b)); }catch(e){}
+    // tell the sticky bar (interactive.js) the selection changed — the two
+    // scripts render independently and used to fall out of sync (manager bug)
+    try{ window.dispatchEvent(new CustomEvent("bl-basket")); }catch(e){} }
 
   function iso(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
   function parseISO(s){ var p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
@@ -252,10 +255,13 @@
     }
 
     // ---------- CHECKOUT ----------
-    function field(label,type,ph){
+    function field(label,type,ph,req){
       var w=el("div","margin-bottom:14px;text-align:left;");
-      w.appendChild(el("label","font-family:"+FONT+";font-size:13px;font-weight:600;color:"+INK+";display:block;margin-bottom:6px;",{text:label}));
+      var lab=el("label","font-family:"+FONT+";font-size:13px;font-weight:600;color:"+INK+";display:block;margin-bottom:6px;",{text:label});
+      if(req) lab.appendChild(el("span","color:#c0392b;",{text:" *"}));
+      w.appendChild(lab);
       var i=el("input","font-family:"+FONT+";font-size:15px;padding:11px 14px;border:1px solid "+BORDER+";border-radius:8px;width:100%;box-sizing:border-box;background:"+CARD+";color:"+INK+";",{type:type,placeholder:ph||""});
+      if(req) i.setAttribute("required","required");
       w.appendChild(i); w._input=i; return w;
     }
     function check(label){
@@ -281,31 +287,13 @@
       sum.appendChild(tr);
       root.appendChild(sum);
 
+      // lean checkout (manager 2026-07-08): just name + phone, both required.
+      // Email / payment block / policy + promo notes / consents removed —
+      // pay-at-venue is already stated in the summary and the section intro.
       var box=el("div","max-width:460px;margin:0 auto;text-align:left;");
-      var fName=field(L.fullName,"text","Jonas Jonaitis"), fEmail=field(L.email,"email","you@example.com"), fPhone=field(L.phone,"tel","+370 …");
+      var fName=field(L.fullName,"text","Jonas Jonaitis",true), fPhone=field(L.phone,"tel","+370 …",true);
       box.appendChild(el("div","font-family:"+FONT+";font-size:15px;font-weight:700;color:"+INK+";margin-bottom:12px;",{text:L.guest}));
-      box.appendChild(fName); box.appendChild(fPhone); box.appendChild(fEmail);
-
-      // payment
-      box.appendChild(el("div","font-family:"+FONT+";font-size:15px;font-weight:700;color:"+INK+";margin:18px 0 8px;",{text:L.payment}));
-      box.appendChild(el("div","font-family:"+FONT+";font-size:14px;color:"+INK+";border:1px solid "+CORAL+";border-radius:8px;padding:12px 14px;",{text:"◉  "+L.payVenue}));
-      box.appendChild(el("div","font-family:"+FONT+";font-size:12px;color:"+MUTED+";margin:8px 0 4px;",{text:L.cancelNote}));
-      box.appendChild(el("div","font-family:"+FONT+";font-size:12px;color:"+MUTED+";background:#f6efe0;border-radius:8px;padding:8px 12px;margin:8px 0 4px;",{text:L.promoNote}));
-
-      // venue policies (collapsible)
-      var polWrap=el("div","border:1px solid "+BORDER+";border-radius:8px;margin:14px 0;overflow:hidden;");
-      var polBody=el("div","font-family:"+FONT+";font-size:13px;color:"+MUTED+";line-height:1.6;padding:0 14px;max-height:0;overflow:hidden;transition:max-height .2s ease,padding .2s ease;");
-      polBody.appendChild(el("p","margin:0 0 8px;",{text:L.pol1}));
-      polBody.appendChild(el("p","margin:0 0 12px;",{text:L.pol2}));
-      var polHead=el("button","width:100%;display:flex;justify-content:space-between;align-items:center;background:"+CARD+";border:none;padding:14px;cursor:pointer;font-family:"+FONT+";font-size:15px;font-weight:700;color:"+INK+";",{});
-      polHead.appendChild(el("span","",{text:L.venuePolicies})); var caret=el("span","color:"+MUTED+";",{text:"▾"});
-      polHead.appendChild(caret);
-      polHead.addEventListener("click",function(){ var open=polBody.style.maxHeight&&polBody.style.maxHeight!=="0px"; polBody.style.maxHeight=open?"0":"200px"; polBody.style.padding=open?"0 14px":"4px 14px 12px"; caret.textContent=open?"▾":"▴"; });
-      polWrap.appendChild(polHead); polWrap.appendChild(polBody); box.appendChild(polWrap);
-
-      // consent
-      box.appendChild(check(L.consent1));
-      box.appendChild(check(L.consent2));
+      box.appendChild(fName); box.appendChild(fPhone);
 
       var err=el("p","font-family:"+FONT+";color:"+CORAL+";font-size:14px;margin:6px 0;display:none;"); box.appendChild(err);
       var confirm=el("button",BTN+"width:100%;margin-top:8px;",{text:L.complete}); box.appendChild(confirm);
@@ -314,7 +302,7 @@
       root.appendChild(box);
 
       confirm.addEventListener("click",function(){
-        var name=fName._input.value.trim(), phone=fPhone._input.value.trim(), email=fEmail._input.value.trim();
+        var name=fName._input.value.trim(), phone=fPhone._input.value.trim(), email="";
         err.style.display="none";
         if(!name||!phone){ err.textContent=L.errName; err.style.display="block"; return; }
         confirm.disabled=true; confirm.textContent=L.booking;

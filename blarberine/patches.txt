@@ -15,3 +15,5 @@ blarberine.patches.rebuild_pages_v6
 blarberine.patches.rebuild_pages_v7
 blarberine.patches.seed_translations_v1
 blarberine.patches.rebuild_pages_v8
+blarberine.patches.add_barbershop_workspace_v1
+blarberine.patches.rebuild_pages_v9

@@ -63,6 +63,10 @@
     // detached from the DOM (never re-appended because `bar` was still set)
     // would render the selection off-screen until a page refresh.
     if(bar){ bar.remove(); bar=null; }
+    // never on pages that embed the booking widget — the widget IS the basket
+    // UI there; a second bar over it went stale and covered the checkout
+    // (manager bugs: "row inconsistent" + "bugs on the sticky bar")
+    if(document.getElementById("booking-app")){ barOpen=false; return; }
     var b=loadBasket();
     if(!b.length){ barOpen=false; return; }
     var total=b.reduce(function(s,x){return s+(x.price||0);},0);
@@ -282,6 +286,10 @@
     initReveal();
     initConsent();
     wireMobileMenu();
+    // keep the sticky bar in sync when booking.js (or another tab) changes
+    // the selection — the two scripts render independently
+    window.addEventListener("bl-basket",renderBar);
+    window.addEventListener("storage",function(ev){ if(!ev||!ev.key||ev.key==="bl_basket") renderBar(); });
     var sApp=document.getElementById("services-app");
     var tApp=document.getElementById("team-app");
     if(!sApp && !tApp){ renderBar(); return; }

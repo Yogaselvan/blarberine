@@ -430,7 +430,9 @@ def create_basket_booking(customer_name, services, date, start_time, phone=None,
     """Create back-to-back Appointments for a basket of services. Picks a
     qualified barber for `any`. Re-validates availability server-side."""
     services = frappe.parse_json(services) if isinstance(services, str) else services
-    if not (customer_name and services and date and start_time):
+    # phone is required too (manager 2026-07-08) — the JS enforces it, this
+    # keeps direct API calls honest
+    if not (customer_name and phone and services and date and start_time):
         return {"success": False, "error": _("Missing required fields")}
     date_obj = frappe.utils.getdate(date)
     start_min = _to_minutes(start_time)
