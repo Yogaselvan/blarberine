@@ -22,6 +22,16 @@ MIN_LEAD_MINUTES = 15
 SHOP_NAME = "Blarberinė"
 SHOP_ADDRESS = "Utenos g. 16, Kaunas"
 
+# Role copied on every barber's booking (task 3). Created by patch.
+MANAGER_ROLE = "Barbers Manager"
+
+# A reminder this many minutes before the visit (task 5). Bookings made inside
+# this window get no reminder — the manager asked to skip those.
+REMINDER_LEAD_MINUTES = 120
+# Width of the slice the reminder job scans; must match the cron interval in
+# hooks.py or appointments would be missed (too narrow) or double-sent.
+REMINDER_WINDOW_MINUTES = 15
+
 
 def _to_minutes(value):
     """Normalise a Frappe Time value to minutes-since-midnight.
@@ -243,6 +253,7 @@ def create_booking(customer_name, phone=None, email=None, barber=None,
     frappe.db.commit()
     _send_booking_emails([appt.name], customer_name, phone, email, barber,
                          [service], date_obj, start_label, end_label)
+    _send_booking_sms(barber, customer_name, phone, [service], date_obj, start_label)
 
     return {
         "success": True,
@@ -313,7 +324,21 @@ def get_booking_data(lang="lt"):
         if not b.photo:
             b["photo"] = BARBER_FALLBACK
 
-    return {"service_categories": out_cats, "barbers": barbers}
+    # Manager-uploaded "Our work" photos (Gallery Image DocType). The same set
+    # the home page repeater uses, so the team page shows identical photos
+    # rather than the stock placeholders it had before (manager 2026-09).
+    gallery = frappe.get_all(
+        "Gallery Image",
+        fields=["image", "caption"],
+        order_by="display_order asc, creation asc",
+    )
+    gallery = [g for g in gallery if g.get("image")]
+
+    return {
+        "service_categories": out_cats,
+        "barbers": barbers,
+        "gallery_images": gallery,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -468,8 +493,182 @@ def create_basket_booking(customer_name, services, date, start_time, phone=None,
     frappe.db.commit()
     _send_booking_emails(appts, customer_name, phone, email, barber, services,
                          date_obj, _fmt(start_min), _fmt(start_min + total))
+    _send_booking_sms(barber, customer_name, phone, services, date_obj, _fmt(start_min))
     return {"success": True, "appointments": appts, "barber": barber,
             "start_time": _fmt(start_min), "end_time": _fmt(start_min + total)}
+
+
+# ---------------------------------------------------------------------------
+# Booking notification SMS (Twilio, via Frappe's "SMS Settings" single).
+#
+# Task 2 (manager 2026-09): only the barber the booking was assigned to is
+# notified. The Desk Notification rule that did this before ("New appointment
+# SMS") picked recipients by ROLE, and Frappe resolves a role to the mobile_no
+# of EVERY user holding it — which is why all barbers and the manager received
+# every booking. That rule is disabled by patch; recipients are decided here.
+# ---------------------------------------------------------------------------
+
+
+def _sms_safe(receivers, msg):
+    """send_sms that can never break the booking flow.
+
+    `success_msg=False` matters: the default pushes a msgprint that would leak
+    into the guest booking response's _server_messages (same class of bug the
+    email path guards against in _safe_send).
+    """
+    try:
+        nums = [n for n in dict.fromkeys(receivers) if n]
+        if not nums:
+            return
+        from frappe.core.doctype.sms_settings.sms_settings import send_sms
+
+        send_sms(receiver_list=nums, msg=msg, success_msg=False)
+    except Exception:
+        frappe.clear_last_message()
+        frappe.log_error(frappe.get_traceback(), "Blarberine booking SMS failed")
+
+
+def _service_labels(services):
+    """Readable service names for an SMS body."""
+    return ", ".join(
+        frappe.db.get_value("Service", s, "service_name") or s for s in services
+    )
+
+
+def _send_barber_sms(barber, customer_name, phone, services, date_obj, start_label):
+    """Notify ONLY the barber assigned to this booking.
+
+    `barber` is already resolved by both callers, so when the client picks
+    "any professional" the auto-assigned barber — the one stored on the
+    Appointment — is the one messaged here.
+    """
+    to = frappe.db.get_value("Barber", barber, "phone")
+    if not to:
+        return
+    _sms_safe(
+        [to],
+        "Nauja rezervacija: %s %s. Klientas: %s, tel. %s. Paslaugos: %s."
+        % (
+            frappe.utils.formatdate(date_obj, "dd.MM.yyyy"),
+            start_label,
+            customer_name,
+            phone or "-",
+            _service_labels(services),
+        ),
+    )
+
+
+def _manager_numbers():
+    """Mobile numbers of everyone holding the Barbers Manager role (task 3).
+
+    Read straight off User.mobile_no — the same field Frappe's own role-based
+    notification recipients use.
+    """
+    users = frappe.get_all(
+        "Has Role",
+        filters={"role": MANAGER_ROLE, "parenttype": "User"},
+        pluck="parent",
+    )
+    nums = []
+    for u in users:
+        row = frappe.db.get_value("User", u, ["mobile_no", "enabled"], as_dict=True)
+        if row and row.enabled and row.mobile_no:
+            nums.append(row.mobile_no)
+    return nums
+
+
+def _send_manager_sms(barber, customer_name, phone, services, date_obj, start_label):
+    """Task 3: the shop manager is copied on every barber's booking."""
+    nums = _manager_numbers()
+    if not nums:
+        return
+    barber_name = frappe.db.get_value("Barber", barber, "barber_name") or barber
+    _sms_safe(
+        nums,
+        "Nauja rezervacija (%s): %s %s. Klientas: %s, tel. %s. Paslaugos: %s."
+        % (
+            barber_name,
+            frappe.utils.formatdate(date_obj, "dd.MM.yyyy"),
+            start_label,
+            customer_name,
+            phone or "-",
+            _service_labels(services),
+        ),
+    )
+
+
+def _send_client_sms(barber, phone, date_obj, start_label, lang=None):
+    """Task 4: confirmation to the client the moment the booking completes.
+
+    Wording is the manager's own, kept verbatim in both languages.
+    """
+    if not phone:
+        return
+    lang = lang or _booking_lang()
+    barber_name = frappe.db.get_value("Barber", barber, "barber_name") or barber
+    when = "%s %s" % (frappe.utils.formatdate(date_obj, "yyyy-MM-dd"), start_label)
+    if lang == "en":
+        msg = "Your appointment at %s is confirmed for %s. Your barber is %s." % (
+            SHOP_NAME, when, barber_name)
+    else:
+        msg = "Jūsų vizitas %s patvirtintas %s. Jūsų meistras – %s." % (
+            "Blarberinėje", when, barber_name)
+    _sms_safe([phone], msg)
+
+
+def _send_booking_sms(barber, customer_name, phone, services, date_obj, start_label):
+    """All booking-time SMS in one place: assigned barber, manager, client."""
+    _send_barber_sms(barber, customer_name, phone, services, date_obj, start_label)
+    _send_manager_sms(barber, customer_name, phone, services, date_obj, start_label)
+    _send_client_sms(barber, phone, date_obj, start_label)
+
+
+def send_visit_reminders():
+    """Task 5: remind the client ~2 hours before the visit. Cron, every 15 min.
+
+    Picks appointments starting inside [now+2h, now+2h+15min) that haven't been
+    reminded yet, so each booking is caught exactly once. A booking made less
+    than two hours ahead never enters that window and therefore gets no
+    reminder — the skip the manager asked for, with no extra check needed.
+
+    A basket booking creates one Appointment per service, so reminders are
+    grouped per customer: one SMS for the earliest slot, then every row in the
+    group is flagged.
+    """
+    now = frappe.utils.now_datetime()
+    win_start = frappe.utils.add_to_date(now, minutes=REMINDER_LEAD_MINUTES)
+    win_end = frappe.utils.add_to_date(win_start, minutes=REMINDER_WINDOW_MINUTES)
+    rows = frappe.get_all(
+        "Appointment",
+        filters=[
+            ["status", "=", "Scheduled"],
+            ["reminder_sent", "=", 0],
+            ["start_dt", ">=", win_start],
+            ["start_dt", "<", win_end],
+        ],
+        fields=["name", "customer", "start_dt"],
+        order_by="customer asc, start_dt asc",
+    )
+    if not rows:
+        return
+
+    by_cust = {}
+    for r in rows:
+        by_cust.setdefault(r.customer, []).append(r)
+
+    for cust, group in by_cust.items():
+        phone = frappe.db.get_value("Customer", cust, "phone")
+        if phone:
+            _sms_safe(
+                [phone],
+                "Po dviejų valandų jūsų laukia vizitas Blarberinėje – iki pasimatymo!",
+            )
+        # Flag regardless of phone: without a number it can never be sent, and
+        # leaving it unflagged would re-query the same rows every 15 minutes.
+        for r in group:
+            frappe.db.set_value("Appointment", r.name, "reminder_sent", 1)
+
+    frappe.db.commit()
 
 
 # ---------------------------------------------------------------------------

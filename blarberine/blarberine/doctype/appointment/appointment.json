@@ -18,7 +18,8 @@
   "title",
   "calendar_label",
   "start_dt",
-  "end_dt"
+  "end_dt",
+  "reminder_sent"
  ],
  "fields": [
   {
@@ -108,6 +109,14 @@
    "hidden": 1,
    "label": "End",
    "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Set automatically once the 2-hour reminder SMS has been sent, so the scheduler never sends it twice.",
+   "fieldname": "reminder_sent",
+   "fieldtype": "Check",
+   "label": "Reminder Sent",
    "read_only": 1
   }
  ],

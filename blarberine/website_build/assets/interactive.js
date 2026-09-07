@@ -14,12 +14,14 @@
         pay:"Pay at venue",edit:"▸ Edit",hide:"▾ Hide",remove:"× Remove",choose:"Choose time",
         service:"service",services:"services",svcOf:"'s services",askStore:"Ask in-store for this barber's full menu.",
         noBarbers:"No barbers yet.",errSvc:"Could not load services.",errTeam:"Could not load team.",
+        works:"Our work",
         ckTitle:"We value your privacy",ckText:"We use essential cookies to run the site and, with your consent, analytics cookies to understand how it's used. You can change your choice anytime.",
         ckAll:"Accept all",ckEss:"Essential only"},
     lt:{select:"Pasirinkti",selected:"✓ Pasirinkta",add:"+ Pridėti",added:"✓ Pridėta",show:"Plačiau",all:"Visos",
         pay:"Atsiskaitymas vietoje",edit:"▸ Redaguoti",hide:"▾ Slėpti",remove:"× Pašalinti",choose:"Pasirinkti laiką",
         service:"paslauga",services:"paslaugos",svcOf:" paslaugos",askStore:"Pilno meniu teiraukitės vietoje.",
         noBarbers:"Kirpėjų nėra.",errSvc:"Nepavyko įkelti paslaugų.",errTeam:"Nepavyko įkelti komandos.",
+        works:"Mūsų darbai",
         ckTitle:"Gerbiame jūsų privatumą",ckText:"Naudojame būtinuosius slapukus svetainės veikimui ir, su jūsų sutikimu, analitikos slapukus, kad suprastume, kaip ji naudojama. Pasirinkimą galite keisti bet kada.",
         ckAll:"Priimti visus",ckEss:"Tik būtinuosius"}
   };
@@ -164,7 +166,7 @@
   }
 
   // ---- Team page ----
-  function renderTeam(app, barbers, cats){
+  function renderTeam(app, barbers, cats, gallery){
     clear(app);
     var svcMap={}, catOf={};
     cats.forEach(function(c){ (c.services||[]).forEach(function(s){ svcMap[s.name]=s; catOf[s.name]=c.category_name; }); });
@@ -204,6 +206,21 @@
       names.forEach(function(nm){ var s=svcMap[nm]; if(s){ shown++; svcWrap.appendChild(serviceRow(s)); } });
       if(!shown) svcWrap.appendChild(el("p","font-family:"+FONT+";color:"+MUTED+";font-size:14px;",{text:L.askStore}));
       panel.appendChild(svcWrap);
+      // Manager-uploaded photos from the Gallery Image DocType — the same set
+      // the home page "Our work" section shows, so the barber pages no longer
+      // fall back to stock placeholders (manager 2026-09).
+      if(gallery && gallery.length){
+        panel.appendChild(el("div","font-family:"+FONT+";font-size:13px;color:"+MUTED+
+          ";font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:24px 0 10px;",{text:L.works}));
+        var gGrid=el("div","display:grid;grid-template-columns:repeat(3,1fr);gap:10px;");
+        gallery.forEach(function(g){
+          var cell=el("div","border-radius:12px;overflow:hidden;line-height:0;");
+          cell.appendChild(el("img","width:100%;height:110px;object-fit:cover;display:block;",
+            {src:g.image,alt:g.caption||"",loading:"lazy"}));
+          gGrid.appendChild(cell);
+        });
+        panel.appendChild(gGrid);
+      }
     }
     drawList(); drawPanel();
     CURRENT_REFRESH=drawPanel;
@@ -296,7 +313,7 @@
     getData().then(function(d){
       var cats=d.service_categories||[], barbers=d.barbers||[];
       if(sApp) renderServices(sApp, cats);
-      if(tApp) renderTeam(tApp, barbers, cats);
+      if(tApp) renderTeam(tApp, barbers, cats, d.gallery_images||[]);
       renderBar();
     }).catch(function(){
       if(sApp) sApp.innerHTML='<p style="font-family:'+FONT+';color:'+CORAL+';text-align:center">'+L.errSvc+'</p>';

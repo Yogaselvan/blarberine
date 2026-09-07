@@ -152,6 +152,14 @@ scheduler_events = {
 	"daily": [
 		"blarberine.blarberine.api.send_reminders",
 	],
+	# Task 5: the 2-hour reminder needs a resolution the daily job can't give,
+	# so it runs every 15 minutes and each run scans a matching 15-minute slice
+	# (see REMINDER_WINDOW_MINUTES — keep the two in sync).
+	"cron": {
+		"*/15 * * * *": [
+			"blarberine.blarberine.api.send_visit_reminders",
+		],
+	},
 }
 
 # scheduler_events = {

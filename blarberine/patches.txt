@@ -17,3 +17,6 @@ blarberine.patches.seed_translations_v1
 blarberine.patches.rebuild_pages_v8
 blarberine.patches.add_barbershop_workspace_v1
 blarberine.patches.rebuild_pages_v9
+blarberine.patches.rebuild_pages_v10
+blarberine.patches.add_barbers_manager_role_v1
+blarberine.patches.disable_broadcast_appointment_sms_v1
