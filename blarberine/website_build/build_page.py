@@ -693,8 +693,14 @@ def team_page():
     app=blk("div",attributes={"id":"team-app"},
         innerHTML='<p style="font-family:'+FONT+';color:'+MUTED+';text-align:center">'+t("loading_team")+'</p>',
         styles={"display":"flex","flexDirection":"column","width":"100%"})
-    work=[img(u2,{"width":"100%","height":"200px","objectFit":"cover","borderRadius":"10px"}) for u2 in WORK]
-    grid=blk("div",children=work,styles={"display":"grid","gridTemplateColumns":"repeat(3, 1fr)","gap":"16px","width":"100%"},mobileStyles={"gridTemplateColumns":"repeat(2, 1fr)"})
+    # Manager-uploaded photos (Gallery Image), via the same repeater the home
+    # page uses. This was a hardcoded stock-photo grid, which is what the
+    # manager saw as "random placeholder pictures" on the barber pages
+    # (2026-09) — the placeholder below is design-time only.
+    gcell=blk("div",children=[img(GALLERY[0],{"width":"100%","height":"200px","objectFit":"cover","display":"block"},key="image")],
+        classes=["bl-zoom"],styles={"borderRadius":"10px","overflow":"hidden","width":"100%"})
+    grid=blk("div",children=[gcell],isRepeater=True,dataKey={"key":"gallery_images","comesFrom":"dataScript"},
+        styles={"display":"grid","gridTemplateColumns":"repeat(3, 1fr)","gap":"16px","width":"100%"},mobileStyles={"gridTemplateColumns":"repeat(2, 1fr)"})
     return _body([nav("team"),
         section([kicker(t("the_team")),h2(t("meet_barbers")),app]),
         section([h2(t("our_work")),grid],bg=ALT),

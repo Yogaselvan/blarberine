@@ -324,21 +324,7 @@ def get_booking_data(lang="lt"):
         if not b.photo:
             b["photo"] = BARBER_FALLBACK
 
-    # Manager-uploaded "Our work" photos (Gallery Image DocType). The same set
-    # the home page repeater uses, so the team page shows identical photos
-    # rather than the stock placeholders it had before (manager 2026-09).
-    gallery = frappe.get_all(
-        "Gallery Image",
-        fields=["image", "caption"],
-        order_by="display_order asc, creation asc",
-    )
-    gallery = [g for g in gallery if g.get("image")]
-
-    return {
-        "service_categories": out_cats,
-        "barbers": barbers,
-        "gallery_images": gallery,
-    }
+    return {"service_categories": out_cats, "barbers": barbers}
 
 
 # ---------------------------------------------------------------------------
