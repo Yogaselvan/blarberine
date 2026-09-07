@@ -21,3 +21,4 @@ blarberine.patches.rebuild_pages_v10
 blarberine.patches.add_barbers_manager_role_v1
 blarberine.patches.disable_broadcast_appointment_sms_v1
 blarberine.patches.rebuild_pages_v11
+blarberine.patches.publish_private_gallery_images_v1
